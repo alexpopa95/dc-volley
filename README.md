@@ -1,13 +1,13 @@
 DCVolley
 ==========
-![DCVolley](https://corporate.doveconviene.it/wp-content/uploads/2015/07/logo-it-low.png)
+![](https://corporate.doveconviene.it/wp-content/uploads/2015/07/logo-it-low.png)
 
-Library Project improvements to [Volley](https://android.googlesource.com/platform/frameworks/volley) made by DoveConviene Android Team.
+Library Project improvements to [Volley](https://android.googlesource.com/platform/frameworks/volley) made by [DoveConviene](https://www.doveconviene.it) Android Team.
 
 ## License
 
 
-    Copyright (C) 2014,2015,2016 DoveConviene
+    Copyright (C) 2016 DoveConviene
     Copyright (C) 2011 The Android Open Source Project
 
     Licensed under the Apache License, Version 2.0 (the "License");
