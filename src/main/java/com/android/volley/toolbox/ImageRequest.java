@@ -34,13 +34,13 @@ import com.android.volley.VolleyLog;
  */
 public class ImageRequest extends Request<Bitmap> {
     /** Socket timeout in milliseconds for image requests */
-    public static final int DEFAULT_IMAGE_TIMEOUT_MS = 1000;
+    private static final int IMAGE_TIMEOUT_MS = 1000;
 
     /** Default number of retries for image requests */
-    public static final int DEFAULT_IMAGE_MAX_RETRIES = 2;
+    private static final int IMAGE_MAX_RETRIES = 2;
 
     /** Default backoff multiplier for image requests */
-    public static final float DEFAULT_IMAGE_BACKOFF_MULT = 2f;
+    private static final float IMAGE_BACKOFF_MULT = 2f;
 
     private final Response.Listener<Bitmap> mListener;
     private final Config mDecodeConfig;
@@ -71,9 +71,9 @@ public class ImageRequest extends Request<Bitmap> {
      */
     public ImageRequest(String url, Response.Listener<Bitmap> listener, int maxWidth, int maxHeight,
             ScaleType scaleType, Config decodeConfig, Response.ErrorListener errorListener) {
-        super(Method.GET, url, errorListener);
-        setRetryPolicy(new DefaultRetryPolicy(DEFAULT_IMAGE_TIMEOUT_MS, DEFAULT_IMAGE_MAX_RETRIES,
-                DEFAULT_IMAGE_BACKOFF_MULT));
+        super(Method.GET, url, errorListener); 
+        setRetryPolicy(
+                new DefaultRetryPolicy(IMAGE_TIMEOUT_MS, IMAGE_MAX_RETRIES, IMAGE_BACKOFF_MULT));
         mListener = listener;
         mDecodeConfig = decodeConfig;
         mMaxWidth = maxWidth;

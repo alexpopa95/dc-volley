@@ -21,11 +21,11 @@ import android.os.SystemClock;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Cache;
 import com.android.volley.Cache.Entry;
-import com.android.volley.ClientError;
 import com.android.volley.Network;
 import com.android.volley.NetworkError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.NoConnectionError;
+import com.android.volley.RedirectError;
 import com.android.volley.Request;
 import com.android.volley.RetryPolicy;
 import com.android.volley.ServerError;
@@ -118,6 +118,12 @@ public class BasicNetwork implements Network {
                             entry.responseHeaders, true,
                             SystemClock.elapsedRealtime() - requestStart);
                 }
+                
+                // Handle moved resources
+                if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY || statusCode == HttpStatus.SC_MOVED_TEMPORARILY) {
+                	String newUrl = responseHeaders.get("Location");
+                	request.setRedirectUrl(newUrl);
+                }
 
                 // Some responses such as 204s do not have content.  We must check.
                 if (httpResponse.getEntity() != null) {
@@ -144,14 +150,19 @@ public class BasicNetwork implements Network {
             } catch (MalformedURLException e) {
                 throw new RuntimeException("Bad URL " + request.getUrl(), e);
             } catch (IOException e) {
-                int statusCode;
+                int statusCode = 0;
+                NetworkResponse networkResponse = null;
                 if (httpResponse != null) {
                     statusCode = httpResponse.getStatusLine().getStatusCode();
                 } else {
                     throw new NoConnectionError(e);
                 }
-                VolleyLog.e("Unexpected response code %d for %s", statusCode, request.getUrl());
-                NetworkResponse networkResponse;
+                if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY || 
+                		statusCode == HttpStatus.SC_MOVED_TEMPORARILY) {
+                	VolleyLog.e("Request at %s has been redirected to %s", request.getOriginUrl(), request.getUrl());
+                } else {
+                	VolleyLog.e("Unexpected response code %d for %s", statusCode, request.getUrl());
+                }
                 if (responseContents != null) {
                     networkResponse = new NetworkResponse(statusCode, responseContents,
                             responseHeaders, false, SystemClock.elapsedRealtime() - requestStart);
@@ -159,22 +170,16 @@ public class BasicNetwork implements Network {
                             statusCode == HttpStatus.SC_FORBIDDEN) {
                         attemptRetryOnException("auth",
                                 request, new AuthFailureError(networkResponse));
-                    } else if (statusCode >= 400 && statusCode <= 499) {
-                        // Don't retry other client errors.
-                        throw new ClientError(networkResponse);
-                    } else if (statusCode >= 500 && statusCode <= 599) {
-                        if (request.shouldRetryServerErrors()) {
-                            attemptRetryOnException("server",
-                                    request, new ServerError(networkResponse));
-                        } else {
-                            throw new ServerError(networkResponse);
-                        }
+                    } else if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY || 
+                    			statusCode == HttpStatus.SC_MOVED_TEMPORARILY) {
+                        attemptRetryOnException("redirect",
+                                request, new RedirectError(networkResponse));
                     } else {
-                        // 3xx? No reason to retry.
+                        // TODO: Only throw ServerError for 5xx status codes.
                         throw new ServerError(networkResponse);
                     }
                 } else {
-                    attemptRetryOnException("network", request, new NetworkError());
+                    throw new NetworkError(e);
                 }
             }
         }
