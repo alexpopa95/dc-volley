@@ -30,7 +30,7 @@ public class MockNetwork implements Network {
 
     /**
      * @param numExceptionsToThrow number of times to throw an exception or
-     * {@link #ALWAYS_THROW_EXCEPTIONS}
+     *                             {@link #ALWAYS_THROW_EXCEPTIONS}
      */
     public void setNumExceptionsToThrow(int numExceptionsToThrow) {
         mNumExceptionsToThrow = numExceptionsToThrow;

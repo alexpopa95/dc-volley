@@ -23,22 +23,39 @@ package com.android.volley;
  */
 public class Response<T> {
 
-    /** Callback interface for delivering parsed responses. */
+    /**
+     * Callback interface for delivering parsed responses.
+     */
     public interface Listener<T> {
-        /** Called when a response is received. */
+        /**
+         * Called when a response is received.
+         *
+         * @param response The response of the given type
+         */
         public void onResponse(T response);
     }
 
-    /** Callback interface for delivering error responses. */
+    /**
+     * Callback interface for delivering error responses.
+     */
     public interface ErrorListener {
         /**
          * Callback method that an error has been occurred with the
          * provided error code and optional user-readable message.
+         *
+         * @param error The response error
          */
         public void onErrorResponse(VolleyError error);
     }
 
-    /** Returns a successful response containing the parsed result. */
+    /**
+     * Returns a successful response containing the parsed result.
+     *
+     * @param result     A result of the expected type
+     * @param cacheEntry A cache entry for this response
+     * @param <T>        Parsed type of this response
+     * @return A successful response
+     */
     public static <T> Response<T> success(T result, Cache.Entry cacheEntry) {
         return new Response<T>(result, cacheEntry);
     }
@@ -46,25 +63,40 @@ public class Response<T> {
     /**
      * Returns a failed response containing the given error code and an optional
      * localized message displayed to the user.
+     *
+     * @param error A response error
+     * @param <T>   Parsed type of this response
+     * @return A failed response
      */
     public static <T> Response<T> error(VolleyError error) {
         return new Response<T>(error);
     }
 
-    /** Parsed response, or null in the case of error. */
+    /**
+     * Parsed response, or null in the case of error.
+     */
     public final T result;
 
-    /** Cache metadata for this response, or null in the case of error. */
+    /**
+     * Cache metadata for this response, or null in the case of error.
+     */
     public final Cache.Entry cacheEntry;
 
-    /** Detailed error information if <code>errorCode != OK</code>. */
+    /**
+     * Detailed error information if <code>errorCode != OK</code>.
+     */
     public final VolleyError error;
 
-    /** True if this response was a soft-expired one and a second one MAY be coming. */
+    /**
+     * True if this response was a soft-expired one and a second one MAY be coming.
+     */
     public boolean intermediate = false;
 
     /**
      * Returns whether this response is considered successful.
+     *
+     * @return <code>true</code> if the response is successful;
+     * <code>false</code> otherwise
      */
     public boolean isSuccess() {
         return error == null;

@@ -22,6 +22,7 @@ import com.android.volley.mock.MockRequest;
 import com.android.volley.mock.ShadowSystemClock;
 import com.android.volley.toolbox.NoCache;
 import com.android.volley.utils.ImmediateResponseDelivery;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,14 +32,11 @@ import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 
@@ -51,14 +49,17 @@ import static org.mockito.MockitoAnnotations.initMocks;
 public class RequestQueueIntegrationTest {
 
     private ResponseDelivery mDelivery;
-    @Mock private Network mMockNetwork;
+    @Mock
+    private Network mMockNetwork;
 
-    @Before public void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         mDelivery = new ImmediateResponseDelivery();
         initMocks(this);
     }
 
-    @Test public void add_requestProcessedInCorrectOrder() throws Exception {
+    @Test
+    public void add_requestProcessedInCorrectOrder() throws Exception {
         // Enqueue 2 requests with different cache keys, and different priorities. The second, higher priority request
         // takes 20ms.
         // Assert that first request is only handled after the first one has been parsed and delivered.
@@ -99,10 +100,11 @@ public class RequestQueueIntegrationTest {
 
     /**
      * Asserts that requests with same cache key are processed in order.
-     *
+     * <p>
      * Needs to be an integration test because relies on complex interations between various queues
      */
-    @Test public void add_dedupeByCacheKey() throws Exception {
+    @Test
+    public void add_dedupeByCacheKey() throws Exception {
         // Enqueue 2 requests with the same cache key. The first request takes 20ms. Assert that the
         // second request is only handled after the first one has been parsed and delivered.
         Request req1 = new MockRequest();
@@ -135,10 +137,11 @@ public class RequestQueueIntegrationTest {
 
     /**
      * Verify RequestFinishedListeners are informed when requests are canceled
-     *
+     * <p>
      * Needs to be an integration test because relies on Request -> dispatcher -> RequestQueue interaction
      */
-    @Test public void add_requestFinishedListenerCanceled() throws Exception {
+    @Test
+    public void add_requestFinishedListenerCanceled() throws Exception {
         RequestFinishedListener listener = mock(RequestFinishedListener.class);
         Request request = new MockRequest();
         Answer<NetworkResponse> delayAnswer = new Answer<NetworkResponse>() {
@@ -163,10 +166,11 @@ public class RequestQueueIntegrationTest {
 
     /**
      * Verify RequestFinishedListeners are informed when requests are successfully delivered
-     *
+     * <p>
      * Needs to be an integration test because relies on Request -> dispatcher -> RequestQueue interaction
      */
-    @Test public void add_requestFinishedListenerSuccess() throws Exception {
+    @Test
+    public void add_requestFinishedListenerSuccess() throws Exception {
         NetworkResponse response = mock(NetworkResponse.class);
         Request request = new MockRequest();
         RequestFinishedListener listener = mock(RequestFinishedListener.class);
@@ -186,10 +190,11 @@ public class RequestQueueIntegrationTest {
 
     /**
      * Verify RequestFinishedListeners are informed when request errors
-     *
+     * <p>
      * Needs to be an integration test because relies on Request -> dispatcher -> RequestQueue interaction
      */
-    @Test public void add_requestFinishedListenerError() throws Exception {
+    @Test
+    public void add_requestFinishedListenerError() throws Exception {
         RequestFinishedListener listener = mock(RequestFinishedListener.class);
         Request request = new MockRequest();
         RequestQueue queue = new RequestQueue(new NoCache(), mMockNetwork, 1, mDelivery);

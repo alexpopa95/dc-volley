@@ -24,6 +24,7 @@ import com.android.volley.Response.Listener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 
@@ -34,8 +35,25 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 
     /**
      * Creates a new request.
-     * @param url URL to fetch the JSON from
-     * @param listener Listener to receive the JSON response
+     *
+     * @param method        the HTTP method to use
+     * @param url           URL to fetch the JSON from
+     * @param requestBody   A {@link String} to post with the request. Null is allowed and
+     *                      indicates no parameters will be posted along with request.
+     * @param listener      Listener to receive the JSON response
+     * @param errorListener Error listener, or null to ignore errors.
+     */
+    public JsonArrayRequest(int method, String url, String requestBody,
+                            Listener<JSONArray> listener, ErrorListener errorListener) {
+        super(method, url, requestBody, listener,
+                errorListener);
+    }
+
+    /**
+     * Creates a new request.
+     *
+     * @param url           URL to fetch the JSON from
+     * @param listener      Listener to receive the JSON response
      * @param errorListener Error listener, or null to ignore errors.
      */
     public JsonArrayRequest(String url, Listener<JSONArray> listener, ErrorListener errorListener) {
@@ -44,11 +62,24 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 
     /**
      * Creates a new request.
-     * @param method the HTTP method to use
-     * @param url URL to fetch the JSON from
-     * @param jsonRequest A {@link JSONArray} to post with the request. Null is allowed and
-     *   indicates no parameters will be posted along with request.
-     * @param listener Listener to receive the JSON response
+     *
+     * @param method        the HTTP method to use
+     * @param url           URL to fetch the JSON from
+     * @param listener      Listener to receive the JSON response
+     * @param errorListener Error listener, or null to ignore errors.
+     */
+    public JsonArrayRequest(int method, String url, Listener<JSONArray> listener, ErrorListener errorListener) {
+        super(method, url, null, listener, errorListener);
+    }
+
+    /**
+     * Creates a new request.
+     *
+     * @param method        the HTTP method to use
+     * @param url           URL to fetch the JSON from
+     * @param jsonRequest   A {@link JSONArray} to post with the request. Null is allowed and
+     *                      indicates no parameters will be posted along with request.
+     * @param listener      Listener to receive the JSON response
      * @param errorListener Error listener, or null to ignore errors.
      */
     public JsonArrayRequest(int method, String url, JSONArray jsonRequest,
@@ -57,6 +88,60 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
                 errorListener);
     }
 
+    /**
+     * Creates a new request.
+     *
+     * @param method        the HTTP method to use
+     * @param url           URL to fetch the JSON from
+     * @param jsonRequest   A {@link JSONObject} to post with the request. Null is allowed and
+     *                      indicates no parameters will be posted along with request.
+     * @param listener      Listener to receive the JSON response
+     * @param errorListener Error listener, or null to ignore errors.
+     */
+    public JsonArrayRequest(int method, String url, JSONObject jsonRequest,
+                            Listener<JSONArray> listener, ErrorListener errorListener) {
+        super(method, url, (jsonRequest == null) ? null : jsonRequest.toString(), listener,
+                errorListener);
+    }
+
+    /**
+     * Constructor which defaults to <code>GET</code> if <code>jsonRequest</code> is
+     * <code>null</code>, <code>POST</code> otherwise.
+     *
+     * @param url           URL to fetch the JSON from
+     * @param jsonRequest   A {@link JSONArray} to post with the request. Null is allowed and
+     *                      indicates no parameters will be posted along with request.
+     * @param listener      Listener to receive the JSON response
+     * @param errorListener Error listener, or null to ignore errors.
+     */
+    public JsonArrayRequest(String url, JSONArray jsonRequest, Listener<JSONArray> listener,
+                            ErrorListener errorListener) {
+        this(jsonRequest == null ? Method.GET : Method.POST, url, jsonRequest,
+                listener, errorListener);
+    }
+
+    /**
+     * Constructor which defaults to <code>GET</code> if <code>jsonRequest</code> is
+     * <code>null</code>, <code>POST</code> otherwise.
+     *
+     * @param url           URL to fetch the JSON from
+     * @param jsonRequest   A {@link JSONObject} to post with the request. Null is allowed and
+     *                      indicates no parameters will be posted along with request.
+     * @param listener      Listener to receive the JSON response
+     * @param errorListener Error listener, or null to ignore errors.
+     */
+    public JsonArrayRequest(String url, JSONObject jsonRequest, Listener<JSONArray> listener,
+                            ErrorListener errorListener) {
+        this(jsonRequest == null ? Method.GET : Method.POST, url, jsonRequest,
+                listener, errorListener);
+    }
+
+    /**
+     * Parses the raw network response for the JSONArray response type.
+     *
+     * @param response Response from the network
+     * @return The parsed response, or null in the case of an error
+     */
     @Override
     protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
         try {

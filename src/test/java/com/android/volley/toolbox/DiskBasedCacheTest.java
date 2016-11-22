@@ -18,6 +18,7 @@ package com.android.volley.toolbox;
 
 import com.android.volley.Cache;
 import com.android.volley.toolbox.DiskBasedCache.CacheHeader;
+
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -26,12 +27,14 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class DiskBasedCacheTest {
 
     // Simple end-to-end serialize/deserialize test.
-    @Test public void cacheHeaderSerialization() throws Exception {
+    @Test
+    public void cacheHeaderSerialization() throws Exception {
         Cache.Entry e = new Cache.Entry();
         e.data = new byte[8];
         e.serverDate = 1234567L;
@@ -57,7 +60,8 @@ public class DiskBasedCacheTest {
         assertEquals(first.responseHeaders, second.responseHeaders);
     }
 
-    @Test public void serializeInt() throws Exception {
+    @Test
+    public void serializeInt() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DiskBasedCache.writeInt(baos, 0);
         DiskBasedCache.writeInt(baos, 19791214);
@@ -72,7 +76,8 @@ public class DiskBasedCacheTest {
         assertEquals(DiskBasedCache.readInt(bais), Integer.MAX_VALUE);
     }
 
-    @Test public void serializeLong() throws Exception {
+    @Test
+    public void serializeLong() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DiskBasedCache.writeLong(baos, 0);
         DiskBasedCache.writeLong(baos, 31337);
@@ -91,7 +96,8 @@ public class DiskBasedCacheTest {
         assertEquals(DiskBasedCache.readLong(bais), Long.MAX_VALUE);
     }
 
-    @Test public void serializeString() throws Exception {
+    @Test
+    public void serializeString() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DiskBasedCache.writeString(baos, "");
         DiskBasedCache.writeString(baos, "This is a string.");
@@ -102,7 +108,8 @@ public class DiskBasedCacheTest {
         assertEquals(DiskBasedCache.readString(bais), "ファイカス");
     }
 
-    @Test public void serializeMap() throws Exception {
+    @Test
+    public void serializeMap() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         Map<String, String> empty = new HashMap<String, String>();
         DiskBasedCache.writeStringStringMap(empty, baos);

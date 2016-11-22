@@ -48,20 +48,36 @@ import java.util.Map;
  * An HttpStack that performs request over an {@link HttpClient}.
  */
 public class HttpClientStack implements HttpStack {
+
     protected final HttpClient mClient;
 
     private final static String HEADER_CONTENT_TYPE = "Content-Type";
 
+    /**
+     * @param client The client to use
+     */
     public HttpClientStack(HttpClient client) {
         mClient = client;
     }
 
+    /**
+     * Adds the headers to the request.
+     *
+     * @param httpRequest The request
+     * @param headers     The Map of headers
+     */
     private static void addHeaders(HttpUriRequest httpRequest, Map<String, String> headers) {
         for (String key : headers.keySet()) {
             httpRequest.setHeader(key, headers.get(key));
         }
     }
 
+    /**
+     * Returns the list of the POST parameters of the request.
+     *
+     * @param postParams The POST parameters
+     * @return a List of POST parameters
+     */
     @SuppressWarnings("unused")
     private static List<NameValuePair> getPostParameterPairs(Map<String, String> postParams) {
         List<NameValuePair> result = new ArrayList<NameValuePair>(postParams.size());
@@ -71,6 +87,14 @@ public class HttpClientStack implements HttpStack {
         return result;
     }
 
+    /**
+     * @param request           the request to perform
+     * @param additionalHeaders additional headers to be sent together with
+     *                          {@link Request#getHeaders()}
+     * @return the response resulting from the given request
+     * @throws IOException      in case of a problem or the connection was aborted
+     * @throws AuthFailureError as authentication may be required to provide these values
+     */
     @Override
     public HttpResponse performRequest(Request<?> request, Map<String, String> additionalHeaders)
             throws IOException, AuthFailureError {
@@ -89,10 +113,15 @@ public class HttpClientStack implements HttpStack {
 
     /**
      * Creates the appropriate subclass of HttpUriRequest for passed in request.
+     *
+     * @param request           The request to subclass
+     * @param additionalHeaders The additional header entries
+     * @return The final request
+     * @throws AuthFailureError as authentication may be required to provide these values
      */
     @SuppressWarnings("deprecation")
     /* protected */ static HttpUriRequest createHttpRequest(Request<?> request,
-            Map<String, String> additionalHeaders) throws AuthFailureError {
+                                                            Map<String, String> additionalHeaders) throws AuthFailureError {
         switch (request.getMethod()) {
             case Method.DEPRECATED_GET_OR_POST: {
                 // This is the deprecated way that needs to be handled for backwards compatibility.
@@ -143,8 +172,15 @@ public class HttpClientStack implements HttpStack {
         }
     }
 
+    /**
+     * Adds an {@link HttpEntity} entity to the request if the body is not null.
+     *
+     * @param httpRequest The http request
+     * @param request     The request
+     * @throws AuthFailureError as authentication may be required to provide these values.
+     */
     private static void setEntityIfNonEmptyBody(HttpEntityEnclosingRequestBase httpRequest,
-            Request<?> request) throws AuthFailureError {
+                                                Request<?> request) throws AuthFailureError {
         byte[] body = request.getBody();
         if (body != null) {
             HttpEntity entity = new ByteArrayEntity(body);
@@ -154,8 +190,11 @@ public class HttpClientStack implements HttpStack {
 
     /**
      * Called before the request is executed using the underlying HttpClient.
-     *
+     * <p>
      * <p>Overwrite in subclasses to augment the request.</p>
+     *
+     * @param request The request
+     * @throws IOException in case of a problem or the connection was aborted
      */
     protected void onPrepareRequest(HttpUriRequest request) throws IOException {
         // Nothing.
@@ -172,12 +211,16 @@ public class HttpClientStack implements HttpStack {
             super();
         }
 
+        /**
+         * @param uri the URI object for the HttpPatch
+         */
         public HttpPatch(final URI uri) {
             super();
             setURI(uri);
         }
 
         /**
+         * @param uri the URI object for the HttpPatch
          * @throws IllegalArgumentException if the uri is invalid.
          */
         public HttpPatch(final String uri) {
@@ -185,6 +228,11 @@ public class HttpClientStack implements HttpStack {
             setURI(URI.create(uri));
         }
 
+        /**
+         * Returns the current method.
+         *
+         * @return The current method
+         */
         @Override
         public String getMethod() {
             return METHOD_NAME;

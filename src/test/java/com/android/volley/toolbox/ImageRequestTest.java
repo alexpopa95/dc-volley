@@ -20,6 +20,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
+
 import com.android.volley.NetworkResponse;
 import com.android.volley.Response;
 
@@ -32,12 +33,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
 public class ImageRequestTest {
 
-    @Test public void parseNetworkResponse_resizing() throws Exception {
+    @Test
+    public void parseNetworkResponse_resizing() throws Exception {
         // This is a horrible hack but Robolectric doesn't have a way to provide
         // width and height hints for decodeByteArray. It works because the byte array
         // "file:fake" is ASCII encodable and thus the name in Robolectric's fake
@@ -136,7 +140,8 @@ public class ImageRequestTest {
         assertEquals(expectedHeight, bitmap.getHeight());
     }
 
-    @Test public void findBestSampleSize() {
+    @Test
+    public void findBestSampleSize() {
         // desired == actual == 1
         assertEquals(1, ImageRequest.findBestSampleSize(100, 150, 100, 150));
 
@@ -169,8 +174,5 @@ public class ImageRequestTest {
         assertNotNull(ImageRequest.class.getConstructor(String.class, Response.Listener.class,
                 int.class, int.class, ImageView.ScaleType.class, Bitmap.Config.class,
                 Response.ErrorListener.class));
-        assertEquals(ImageRequest.DEFAULT_IMAGE_TIMEOUT_MS, 1000);
-        assertEquals(ImageRequest.DEFAULT_IMAGE_MAX_RETRIES, 2);
-        assertEquals(ImageRequest.DEFAULT_IMAGE_BACKOFF_MULT, 2f);
     }
 }

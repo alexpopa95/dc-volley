@@ -21,11 +21,11 @@ import android.os.SystemClock;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Cache;
 import com.android.volley.Cache.Entry;
-import com.android.volley.ClientError;
 import com.android.volley.Network;
 import com.android.volley.NetworkError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.NoConnectionError;
+import com.android.volley.RedirectError;
 import com.android.volley.Request;
 import com.android.volley.RetryPolicy;
 import com.android.volley.ServerError;
@@ -76,7 +76,7 @@ public class BasicNetwork implements Network {
 
     /**
      * @param httpStack HTTP stack to be used
-     * @param pool a buffer pool that improves GC performance in copy operations
+     * @param pool      a buffer pool that improves GC performance in copy operations
      */
     public BasicNetwork(HttpStack httpStack, ByteArrayPool pool) {
         mHttpStack = httpStack;
@@ -119,13 +119,19 @@ public class BasicNetwork implements Network {
                             SystemClock.elapsedRealtime() - requestStart);
                 }
 
+                // Handle moved resources
+                if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY || statusCode == HttpStatus.SC_MOVED_TEMPORARILY) {
+                    String newUrl = responseHeaders.get("Location");
+                    request.setRedirectUrl(newUrl);
+                }
+
                 // Some responses such as 204s do not have content.  We must check.
                 if (httpResponse.getEntity() != null) {
-                  responseContents = entityToBytes(httpResponse.getEntity());
+                    responseContents = entityToBytes(httpResponse.getEntity());
                 } else {
-                  // Add 0 byte response as a way of honestly representing a
-                  // no-content request.
-                  responseContents = new byte[0];
+                    // Add 0 byte response as a way of honestly representing a
+                    // no-content request.
+                    responseContents = new byte[0];
                 }
 
                 // if the request is slow, log it.
@@ -144,14 +150,19 @@ public class BasicNetwork implements Network {
             } catch (MalformedURLException e) {
                 throw new RuntimeException("Bad URL " + request.getUrl(), e);
             } catch (IOException e) {
-                int statusCode;
+                int statusCode = 0;
+                NetworkResponse networkResponse = null;
                 if (httpResponse != null) {
                     statusCode = httpResponse.getStatusLine().getStatusCode();
                 } else {
                     throw new NoConnectionError(e);
                 }
-                VolleyLog.e("Unexpected response code %d for %s", statusCode, request.getUrl());
-                NetworkResponse networkResponse;
+                if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY ||
+                        statusCode == HttpStatus.SC_MOVED_TEMPORARILY) {
+                    VolleyLog.e("Request at %s has been redirected to %s", request.getOriginUrl(), request.getUrl());
+                } else {
+                    VolleyLog.e("Unexpected response code %d for %s", statusCode, request.getUrl());
+                }
                 if (responseContents != null) {
                     networkResponse = new NetworkResponse(statusCode, responseContents,
                             responseHeaders, false, SystemClock.elapsedRealtime() - requestStart);
@@ -159,22 +170,16 @@ public class BasicNetwork implements Network {
                             statusCode == HttpStatus.SC_FORBIDDEN) {
                         attemptRetryOnException("auth",
                                 request, new AuthFailureError(networkResponse));
-                    } else if (statusCode >= 400 && statusCode <= 499) {
-                        // Don't retry other client errors.
-                        throw new ClientError(networkResponse);
-                    } else if (statusCode >= 500 && statusCode <= 599) {
-                        if (request.shouldRetryServerErrors()) {
-                            attemptRetryOnException("server",
-                                    request, new ServerError(networkResponse));
-                        } else {
-                            throw new ServerError(networkResponse);
-                        }
+                    } else if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY ||
+                            statusCode == HttpStatus.SC_MOVED_TEMPORARILY) {
+                        attemptRetryOnException("redirect",
+                                request, new RedirectError(networkResponse));
                     } else {
-                        // 3xx? No reason to retry.
+                        // TODO: Only throw ServerError for 5xx status codes.
                         throw new ServerError(networkResponse);
                     }
                 } else {
-                    attemptRetryOnException("network", request, new NetworkError());
+                    throw new NetworkError(e);
                 }
             }
         }
@@ -184,10 +189,10 @@ public class BasicNetwork implements Network {
      * Logs requests that took over SLOW_REQUEST_THRESHOLD_MS to complete.
      */
     private void logSlowRequests(long requestLifetime, Request<?> request,
-            byte[] responseContents, StatusLine statusLine) {
+                                 byte[] responseContents, StatusLine statusLine) {
         if (DEBUG || requestLifetime > SLOW_REQUEST_THRESHOLD_MS) {
             VolleyLog.d("HTTP response for request=<%s> [lifetime=%d], [size=%s], " +
-                    "[rc=%d], [retryCount=%s]", request, requestLifetime,
+                            "[rc=%d], [retryCount=%s]", request, requestLifetime,
                     responseContents != null ? responseContents.length : "null",
                     statusLine.getStatusCode(), request.getRetryPolicy().getCurrentRetryCount());
         }
@@ -196,10 +201,11 @@ public class BasicNetwork implements Network {
     /**
      * Attempts to prepare the request for a retry. If there are no more attempts remaining in the
      * request's retry policy, a timeout exception is thrown.
+     *
      * @param request The request to use.
      */
     private static void attemptRetryOnException(String logPrefix, Request<?> request,
-            VolleyError exception) throws VolleyError {
+                                                VolleyError exception) throws VolleyError {
         RetryPolicy retryPolicy = request.getRetryPolicy();
         int oldTimeout = request.getTimeoutMs();
 
@@ -234,7 +240,9 @@ public class BasicNetwork implements Network {
         VolleyLog.v("HTTP ERROR(%s) %d ms to fetch %s", what, (now - start), url);
     }
 
-    /** Reads the contents of HttpEntity into a byte[]. */
+    /**
+     * Reads the contents of HttpEntity into a byte[].
+     */
     private byte[] entityToBytes(HttpEntity entity) throws IOException, ServerError {
         PoolingByteArrayOutputStream bytes =
                 new PoolingByteArrayOutputStream(mPool, (int) entity.getContentLength());
@@ -265,7 +273,10 @@ public class BasicNetwork implements Network {
     }
 
     /**
-     * Converts Headers[] to Map<String, String>.
+     * Converts Headers[] to Map&lt;String, String&gt;.
+     *
+     * @param headers the header array to be converted
+     * @return a Map of headers entries
      */
     protected static Map<String, String> convertHeaders(Header[] headers) {
         Map<String, String> result = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);

@@ -98,7 +98,7 @@ public class MockHttpClient implements HttpClient {
 
     @Override
     public <T> T execute(HttpHost arg0, HttpRequest arg1, ResponseHandler<? extends T> arg2,
-            HttpContext arg3) {
+                         HttpContext arg3) {
         throw new UnsupportedOperationException();
     }
 

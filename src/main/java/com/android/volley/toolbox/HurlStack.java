@@ -58,6 +58,9 @@ public class HurlStack implements HttpStack {
         /**
          * Returns a URL to use instead of the provided one, or null to indicate
          * this URL should not be used at all.
+         *
+         * @param originalUrl The provided URL
+         * @return a URL to use instead of the provided one
          */
         public String rewriteUrl(String originalUrl);
     }
@@ -77,7 +80,7 @@ public class HurlStack implements HttpStack {
     }
 
     /**
-     * @param urlRewriter Rewriter to use for request URLs
+     * @param urlRewriter      Rewriter to use for request URLs
      * @param sslSocketFactory SSL factory to use for HTTPS connections
      */
     public HurlStack(UrlRewriter urlRewriter, SSLSocketFactory sslSocketFactory) {
@@ -130,21 +133,23 @@ public class HurlStack implements HttpStack {
 
     /**
      * Checks if a response message contains a body.
-     * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.3">RFC 7230 section 3.3</a>
+     *
      * @param requestMethod request method
-     * @param responseCode response status code
+     * @param responseCode  response status code
      * @return whether the response has a body
+     * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.3">RFC 7230 section 3.3</a>
      */
     private static boolean hasResponseBody(int requestMethod, int responseCode) {
         return requestMethod != Request.Method.HEAD
-            && !(HttpStatus.SC_CONTINUE <= responseCode && responseCode < HttpStatus.SC_OK)
-            && responseCode != HttpStatus.SC_NO_CONTENT
-            && responseCode != HttpStatus.SC_NOT_MODIFIED;
+                && !(HttpStatus.SC_CONTINUE <= responseCode && responseCode < HttpStatus.SC_OK)
+                && responseCode != HttpStatus.SC_NO_CONTENT
+                && responseCode != HttpStatus.SC_NOT_MODIFIED;
     }
 
     /**
      * Initializes an {@link HttpEntity} from the given {@link HttpURLConnection}.
-     * @param connection
+     *
+     * @param connection A connection
      * @return an HttpEntity populated with data from <code>connection</code>.
      */
     private static HttpEntity entityFromConnection(HttpURLConnection connection) {
@@ -164,23 +169,21 @@ public class HurlStack implements HttpStack {
 
     /**
      * Create an {@link HttpURLConnection} for the specified {@code url}.
+     *
+     * @param url The url for the connection
+     * @return An open connection
+     * @throws IOException in case of a problem or the connection was aborted
      */
     protected HttpURLConnection createConnection(URL url) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
-        // Workaround for the M release HttpURLConnection not observing the
-        // HttpURLConnection.setFollowRedirects() property.
-        // https://code.google.com/p/android/issues/detail?id=194495
-        connection.setInstanceFollowRedirects(HttpURLConnection.getFollowRedirects());
-
-        return connection;
+        return (HttpURLConnection) url.openConnection();
     }
 
     /**
      * Opens an {@link HttpURLConnection} with parameters.
-     * @param url
+     *
+     * @param url The url for the connection
      * @return an open connection
-     * @throws IOException
+     * @throws IOException in case of a problem or the connection was aborted
      */
     private HttpURLConnection openConnection(URL url, Request<?> request) throws IOException {
         HttpURLConnection connection = createConnection(url);
@@ -193,15 +196,23 @@ public class HurlStack implements HttpStack {
 
         // use caller-provided custom SslSocketFactory, if any, for HTTPS
         if ("https".equals(url.getProtocol()) && mSslSocketFactory != null) {
-            ((HttpsURLConnection)connection).setSSLSocketFactory(mSslSocketFactory);
+            ((HttpsURLConnection) connection).setSSLSocketFactory(mSslSocketFactory);
         }
 
         return connection;
     }
 
+    /**
+     * Sets the connection parameters for the request.
+     *
+     * @param connection A connection
+     * @param request    A request
+     * @throws IOException      in case of a problem or the connection was aborted
+     * @throws AuthFailureError as authentication may be required to provide these values
+     */
     @SuppressWarnings("deprecation")
     /* package */ static void setConnectionParametersForRequest(HttpURLConnection connection,
-            Request<?> request) throws IOException, AuthFailureError {
+                                                                Request<?> request) throws IOException, AuthFailureError {
         switch (request.getMethod()) {
             case Method.DEPRECATED_GET_OR_POST:
                 // This is the deprecated way that needs to be handled for backwards compatibility.
@@ -255,6 +266,14 @@ public class HurlStack implements HttpStack {
         }
     }
 
+    /**
+     * Adds a body to the request
+     *
+     * @param connection A connection
+     * @param request    A request
+     * @throws IOException      in case of a problem or the connection was aborted
+     * @throws AuthFailureError as authentication may be required to provide these values
+     */
     private static void addBodyIfExists(HttpURLConnection connection, Request<?> request)
             throws IOException, AuthFailureError {
         byte[] body = request.getBody();
