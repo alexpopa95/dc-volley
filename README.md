@@ -4,6 +4,21 @@ DCVolley
 
 Library Project improvements to [Volley](https://android.googlesource.com/platform/frameworks/volley) made by [DoveConviene](https://www.doveconviene.it) Android Team.
 
+## Download
+
+Define via Gradle:
+```groovy
+
+repositories {
+  maven { url 'https://dl.bintray.com/dvc-android/maven' }
+}
+
+dependencies {
+  compile "it.doveconviene.volley:dc-volley:1.1.1
+}
+
+```
+
 ## License
 
 
