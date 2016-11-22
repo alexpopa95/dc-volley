@@ -30,7 +30,7 @@ import java.util.Map;
 public interface HttpStack {
     /**
      * Performs an HTTP request with the given parameters.
-     * <p>
+     *
      * <p>A GET request is sent if request.getPostBody() == null. A POST request is sent otherwise,
      * and the Content-Type header is set to request.getPostBodyContentType().</p>
      *
