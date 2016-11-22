@@ -94,6 +94,8 @@ public class ImageLoader {
      * @param view The imageView that the listener is associated with.
      * @param defaultImageResId Default image resource ID to use, or 0 if it doesn't exist.
      * @param errorImageResId Error image resource ID to use, or 0 if it doesn't exist.
+     *
+     * @return listener for the image request
      */
     public static ImageListener getImageListener(final ImageView view,
             final int defaultImageResId, final int errorImageResId) {
@@ -178,14 +180,25 @@ public class ImageLoader {
      * request is fulfilled.
      *
      * @param requestUrl The URL of the image to be loaded.
+     * @param listener The image listener
+     *
+     * @return A container object that contains all of the properties of the request, as well as
+     *     the currently available image (default if remote is not loaded).
      */
     public ImageContainer get(String requestUrl, final ImageListener listener) {
         return get(requestUrl, listener, 0, 0);
     }
 
     /**
-     * Equivalent to calling {@link #get(String, ImageListener, int, int, ScaleType)} with
-     * {@code Scaletype == ScaleType.CENTER_INSIDE}.
+     * Returns an ImageContainer for the requested URL.
+     *
+     * @param requestUrl The URL of the image to be loaded.
+     * @param imageListener The image listener
+     * @param maxWidth The maximum width of the returned image.
+     * @param maxHeight The maximum height of the returned image.
+     *
+     * @return A container object that contains all of the properties of the request, as well as
+     *     the currently available image (default if remote is not loaded).
      */
     public ImageContainer get(String requestUrl, ImageListener imageListener,
             int maxWidth, int maxHeight) {
@@ -296,6 +309,7 @@ public class ImageLoader {
     /**
      * Handler for when an image failed to load.
      * @param cacheKey The cache key that is associated with the image request.
+     * @param error The error of this response
      */
     protected void onGetImageError(String cacheKey, VolleyError error) {
         // Notify the requesters that something failed via a null result.
@@ -334,6 +348,7 @@ public class ImageLoader {
          * @param bitmap The final bitmap (if it exists).
          * @param requestUrl The requested URL for this container.
          * @param cacheKey The cache key that identifies the requested URL for this container.
+         * @param listener The listener to call when the remote image is loaded
          */
         public ImageContainer(Bitmap bitmap, String requestUrl,
                 String cacheKey, ImageListener listener) {
@@ -371,6 +386,8 @@ public class ImageLoader {
 
         /**
          * Returns the bitmap associated with the request URL if it has been loaded, null otherwise.
+         *
+         * @return The bitmap associated with the request URL
          */
         public Bitmap getBitmap() {
             return mBitmap;
@@ -378,6 +395,8 @@ public class ImageLoader {
 
         /**
          * Returns the requested URL for this container.
+         *
+         * @return the requested URL for this container
          */
         public String getRequestUrl() {
             return mRequestUrl;
@@ -413,6 +432,8 @@ public class ImageLoader {
 
         /**
          * Set the error for this response
+         *
+         * @param error An error
          */
         public void setError(VolleyError error) {
             mError = error;
@@ -420,6 +441,8 @@ public class ImageLoader {
 
         /**
          * Get the error for this response
+         *
+         * @return the error for this response
          */
         public VolleyError getError() {
             return mError;
@@ -428,6 +451,8 @@ public class ImageLoader {
         /**
          * Adds another ImageContainer to the list of those interested in the results of
          * the request.
+         *
+         * @param container The container to add to the list
          */
         public void addContainer(ImageContainer container) {
             mContainers.add(container);
@@ -488,17 +513,24 @@ public class ImageLoader {
         }
     }
 
+    /**
+     * Checks if the execution is on the MainThread.
+     */
     private void throwIfNotOnMainThread() {
         if (Looper.myLooper() != Looper.getMainLooper()) {
             throw new IllegalStateException("ImageLoader must be invoked from the main thread.");
         }
     }
+
     /**
      * Creates a cache key for use with the L1 cache.
+     *
      * @param url The URL of the request.
      * @param maxWidth The max-width of the output.
      * @param maxHeight The max-height of the output.
      * @param scaleType The scaleType of the imageView.
+     *
+     * @return The cache key for use with the L1 cache.
      */
     private static String getCacheKey(String url, int maxWidth, int maxHeight, ScaleType scaleType) {
         return new StringBuilder(url.length() + 12).append("#W").append(maxWidth)

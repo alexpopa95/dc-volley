@@ -84,6 +84,14 @@ public class ImageRequest extends Request<Bitmap> {
     /**
      * For API compatibility with the pre-ScaleType variant of the constructor. Equivalent to
      * the normal constructor with {@code ScaleType.CENTER_INSIDE}.
+     *
+     * @param url URL of the image
+     * @param listener Listener to receive the decoded bitmap
+     * @param maxWidth Maximum width to decode this bitmap to, or zero for none
+     * @param maxHeight Maximum height to decode this bitmap to, or zero for
+     *            none
+     * @param decodeConfig Format to decode the bitmap to
+     * @param errorListener Error listener, or null to ignore errors
      */
     @Deprecated
     public ImageRequest(String url, Response.Listener<Bitmap> listener, int maxWidth, int maxHeight,

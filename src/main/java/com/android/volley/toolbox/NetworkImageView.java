@@ -93,6 +93,8 @@ public class NetworkImageView extends ImageView {
     /**
      * Sets the default image resource ID to be used for this view until the attempt to load it
      * completes.
+     *
+     * @param defaultImage The default image resource ID
      */
     public void setDefaultImageResId(int defaultImage) {
         mDefaultImageId = defaultImage;
@@ -101,6 +103,8 @@ public class NetworkImageView extends ImageView {
     /**
      * Sets the error image resource ID to be used for this view in the event that the image
      * requested fails to load.
+     *
+     * @param errorImage The error image resource ID
      */
     public void setErrorImageResId(int errorImage) {
         mErrorImageId = errorImage;

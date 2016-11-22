@@ -86,12 +86,22 @@ public interface Cache {
         /** Immutable response headers as received from server; must be non-null. */
         public Map<String, String> responseHeaders = Collections.emptyMap();
 
-        /** True if the entry is expired. */
+        /**
+         * True if the entry is expired.
+         *
+         * @return <code>true</code> if the entry is expired;
+         *         <code>false</code> otherwise
+         */
         public boolean isExpired() {
             return this.ttl < System.currentTimeMillis();
         }
 
-        /** True if a refresh is needed from the original data source. */
+        /**
+         * True if a refresh is needed from the original data source.
+         *
+         * @return <code>true</code> if a refresh is needed;
+         *         <code>false</code> otherwise
+         */
         public boolean refreshNeeded() {
             return this.softTtl < System.currentTimeMillis();
         }

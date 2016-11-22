@@ -46,13 +46,27 @@ public abstract class JsonRequest<T> extends Request<T> {
      * Deprecated constructor for a JsonRequest which defaults to GET unless {@link #getPostBody()}
      * or {@link #getPostParams()} is overridden (which defaults to POST).
      *
-     * @deprecated Use {@link #JsonRequest(int, String, String, Listener, ErrorListener)}.
+     * @param url URL to fetch the JSON from
+     * @param requestBody A {@link String} to post with the request. Null is allowed and
+     *   indicates no parameters will be posted along with request.
+     * @param listener Listener to receive the JSON response
+     * @param errorListener Error listener, or null to ignore errors.
      */
     public JsonRequest(String url, String requestBody, Listener<T> listener,
             ErrorListener errorListener) {
         this(Method.DEPRECATED_GET_OR_POST, url, requestBody, listener, errorListener);
     }
 
+    /**
+     * Creates a new request.
+     *
+     * @param method the HTTP method to use
+     * @param url URL to fetch the JSON from
+     * @param requestBody A {@link String} to post with the request. Null is allowed and
+     *   indicates no parameters will be posted along with request.
+     * @param listener Listener to receive the JSON response
+     * @param errorListener Error listener, or null to ignore errors.
+     */
     public JsonRequest(int method, String url, String requestBody, Listener<T> listener,
             ErrorListener errorListener) {
         super(method, url, errorListener);

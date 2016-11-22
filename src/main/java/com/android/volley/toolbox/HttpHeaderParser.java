@@ -122,6 +122,9 @@ public class HttpHeaderParser {
 
     /**
      * Parse date in RFC1123 format, and return its value as epoch
+     *
+     * @param dateStr The date to be parsed
+     * @return the value of the date as epoch
      */
     public static long parseDateAsEpoch(String dateStr) {
         try {
@@ -161,6 +164,9 @@ public class HttpHeaderParser {
     /**
      * Returns the charset specified in the Content-Type of this header,
      * or the HTTP default (ISO-8859-1) if none can be found.
+     *
+     * @param headers The header entries
+     * @return The Content-Type of this header
      */
     public static String parseCharset(Map<String, String> headers) {
         return parseCharset(headers, HTTP.DEFAULT_CONTENT_CHARSET);

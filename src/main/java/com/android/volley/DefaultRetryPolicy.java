@@ -63,6 +63,8 @@ public class DefaultRetryPolicy implements RetryPolicy {
 
     /**
      * Returns the current timeout.
+     *
+     * @return The current timeout
      */
     @Override
     public int getCurrentTimeout() {
@@ -71,6 +73,8 @@ public class DefaultRetryPolicy implements RetryPolicy {
 
     /**
      * Returns the current retry count.
+     *
+     * @return The current retry count
      */
     @Override
     public int getCurrentRetryCount() {
@@ -79,6 +83,8 @@ public class DefaultRetryPolicy implements RetryPolicy {
 
     /**
      * Returns the backoff multiplier for the policy.
+     *
+     * @return The backoff multiplier
      */
     public float getBackoffMultiplier() {
         return mBackoffMultiplier;
@@ -99,6 +105,9 @@ public class DefaultRetryPolicy implements RetryPolicy {
 
     /**
      * Returns true if this policy has attempts remaining, false otherwise.
+     *
+     * @return <code>true</code> if this policy has attempts remaining;
+     *         <code>false</code> otherwise
      */
     protected boolean hasAttemptRemaining() {
         return mCurrentRetryCount <= mMaxNumRetries;

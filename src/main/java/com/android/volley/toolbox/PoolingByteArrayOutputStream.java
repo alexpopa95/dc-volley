@@ -35,6 +35,8 @@ public class PoolingByteArrayOutputStream extends ByteArrayOutputStream {
     /**
      * Constructs a new PoolingByteArrayOutputStream with a default size. If more bytes are written
      * to this instance, the underlying byte array will expand.
+     *
+     * @param pool the ByteArrayPool pool
      */
     public PoolingByteArrayOutputStream(ByteArrayPool pool) {
         this(pool, DEFAULT_SIZE);
@@ -45,6 +47,7 @@ public class PoolingByteArrayOutputStream extends ByteArrayOutputStream {
      * more than {@code size} bytes are written to this instance, the underlying byte array will
      * expand.
      *
+     * @param pool the ByteArrayPool pool
      * @param size initial size for the underlying byte array. The value will be pinned to a default
      *        minimum size.
      */
@@ -67,6 +70,8 @@ public class PoolingByteArrayOutputStream extends ByteArrayOutputStream {
 
     /**
      * Ensures there is enough space in the buffer for the given number of additional bytes.
+     *
+     * @param i The index of byte array
      */
     private void expand(int i) {
         /* Can the buffer handle @i more bytes, if not expand it */

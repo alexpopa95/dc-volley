@@ -23,11 +23,15 @@ public interface RetryPolicy {
 
     /**
      * Returns the current timeout (used for logging).
+     *
+     * @return The current timeout
      */
     public int getCurrentTimeout();
 
     /**
      * Returns the current retry count (used for logging).
+     *
+     * @return The current retry count
      */
     public int getCurrentRetryCount();
 

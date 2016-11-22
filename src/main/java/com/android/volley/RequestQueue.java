@@ -41,7 +41,11 @@ public class RequestQueue {
 
     /** Callback interface for completed requests. */
     public static interface RequestFinishedListener<T> {
-        /** Called when a request has finished processing. */
+        /**
+         * Called when a request has finished processing.
+         *
+         * @param request The request
+         * */
         public void onRequestFinished(Request<T> request);
     }
 
@@ -169,6 +173,8 @@ public class RequestQueue {
 
     /**
      * Gets a sequence number.
+     *
+     * @return A sequence number
      */
     public int getSequenceNumber() {
         return mSequenceGenerator.incrementAndGet();
@@ -176,6 +182,8 @@ public class RequestQueue {
 
     /**
      * Gets the {@link Cache} instance being used.
+     *
+     * @return The cache instance being used
      */
     public Cache getCache() {
         return mCache;
@@ -206,6 +214,8 @@ public class RequestQueue {
     /**
      * Cancels all requests in this queue with the given tag. Tag must be non-null
      * and equality is by identity.
+     *
+     * @param tag The request tag
      */
     public void cancelAll(final Object tag) {
         if (tag == null) {
@@ -221,6 +231,7 @@ public class RequestQueue {
 
     /**
      * Adds a Request to the dispatch queue.
+     * @param <T> The type of parsed response this request expects.
      * @param request The request to service
      * @return The passed-in request
      */
@@ -271,6 +282,10 @@ public class RequestQueue {
      *
      * <p>Releases waiting requests for <code>request.getCacheKey()</code> if
      *      <code>request.shouldCache()</code>.</p>
+     *
+     * @param <T> The type of parsed response this request expects.
+     * @param request The request to service
+     * @return The passed-in request
      */
     <T> void finish(Request<T> request) {
         // Remove from the set of requests currently being processed.
@@ -300,6 +315,12 @@ public class RequestQueue {
         }
     }
 
+    /**
+     * Add a RequestFinishedListener.
+     *
+     * @param listener The request listener
+     * @param <T> The type of parsed response this request expects.
+     */
     public  <T> void addRequestFinishedListener(RequestFinishedListener<T> listener) {
       synchronized (mFinishedListeners) {
         mFinishedListeners.add(listener);
@@ -308,6 +329,9 @@ public class RequestQueue {
 
     /**
      * Remove a RequestFinishedListener. Has no effect if listener was not previously added.
+     *
+     * @param listener The request listener
+     * @param <T> The type of parsed response this request expects.
      */
     public  <T> void removeRequestFinishedListener(RequestFinishedListener<T> listener) {
       synchronized (mFinishedListeners) {

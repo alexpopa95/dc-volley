@@ -25,12 +25,15 @@ public interface Authenticator {
     /**
      * Synchronously retrieves an auth token.
      *
+     * @return the authentication token
      * @throws AuthFailureError If authentication did not succeed
      */
     public String getAuthToken() throws AuthFailureError;
 
     /**
      * Invalidates the provided auth token.
+     *
+     * @param authToken the authentication token to invalidate
      */
     public void invalidateAuthToken(String authToken);
 }

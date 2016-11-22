@@ -68,6 +68,8 @@ public class AndroidAuthenticator implements Authenticator {
 
     /**
      * Returns the Account being used by this authenticator.
+     *
+     * @return the current Account
      */
     public Account getAccount() {
         return mAccount;

@@ -38,6 +38,8 @@ public interface HttpStack {
      * @param additionalHeaders additional headers to be sent together with
      *         {@link Request#getHeaders()}
      * @return the HTTP response
+     * @throws IOException in case of a problem or the connection was aborted
+     * @throws AuthFailureError as authentication may be required to provide these values
      */
     public HttpResponse performRequest(Request<?> request, Map<String, String> additionalHeaders)
         throws IOException, AuthFailureError;

@@ -88,7 +88,11 @@ public class JsonObjectRequest extends JsonRequest<JSONObject> {
      * Constructor which defaults to <code>GET</code> if <code>jsonRequest</code> is
      * <code>null</code>, <code>POST</code> otherwise.
      *
-     * @see #JsonObjectRequest(int, String, JSONObject, Listener, ErrorListener)
+     * @param url URL to fetch the JSON from
+     * @param jsonRequest A {@link JSONObject} to post with the request. Null is allowed and
+     *   indicates no parameters will be posted along with request.
+     * @param listener Listener to receive the JSON response
+     * @param errorListener Error listener, or null to ignore errors.
      */
     public JsonObjectRequest(String url, JSONObject jsonRequest, Listener<JSONObject> listener,
             ErrorListener errorListener) {
@@ -96,6 +100,12 @@ public class JsonObjectRequest extends JsonRequest<JSONObject> {
                 listener, errorListener);
     }
 
+    /**
+     * Parses the raw network response for the JSONObject response type.
+     *
+     * @param response Response from the network
+     * @return The parsed response, or null in the case of an error
+     */
     @Override
     protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
         try {

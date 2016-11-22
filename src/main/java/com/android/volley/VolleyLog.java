@@ -25,8 +25,8 @@ import java.util.Locale;
 
 /**
  * Logging helper class.
- * <p/>
- * to see Volley logs call:<br/>
+ * &lt;p/&gt;
+ * to see Volley logs call:&lt;br/&gt;
  * {@code <android-sdk>/platform-tools/adb shell setprop log.tag.Volley VERBOSE}
  */
 public class VolleyLog {
@@ -37,10 +37,12 @@ public class VolleyLog {
     /**
      * Customize the log tag for your application, so that other apps
      * using Volley don't mix their logs with yours.
-     * <br />
+     * &lt;br /&gt;
      * Enable the log property for your tag before starting your app:
-     * <br />
+     * &lt;br /&gt;
      * {@code adb shell setprop log.tag.&lt;tag&gt;}
+     *
+     * @param tag the log tag
      */
     public static void setTag(String tag) {
         d("Changing log tag to %s", tag);

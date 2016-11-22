@@ -270,7 +270,10 @@ public class BasicNetwork implements Network {
     }
 
     /**
-     * Converts Headers[] to Map<String, String>.
+     * Converts Headers[] to Map&lt;String, String&gt;.
+     *
+     * @param headers the header array to be converted
+     * @return a Map of headers entries
      */
     protected static Map<String, String> convertHeaders(Header[] headers) {
         Map<String, String> result = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);

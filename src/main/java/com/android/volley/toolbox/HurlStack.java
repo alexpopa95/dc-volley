@@ -58,6 +58,9 @@ public class HurlStack implements HttpStack {
         /**
          * Returns a URL to use instead of the provided one, or null to indicate
          * this URL should not be used at all.
+         *
+         * @param originalUrl The provided URL
+         * @return a URL to use instead of the provided one
          */
         public String rewriteUrl(String originalUrl);
     }
@@ -144,7 +147,8 @@ public class HurlStack implements HttpStack {
 
     /**
      * Initializes an {@link HttpEntity} from the given {@link HttpURLConnection}.
-     * @param connection
+     *
+     * @param connection A connection
      * @return an HttpEntity populated with data from <code>connection</code>.
      */
     private static HttpEntity entityFromConnection(HttpURLConnection connection) {
@@ -164,6 +168,10 @@ public class HurlStack implements HttpStack {
 
     /**
      * Create an {@link HttpURLConnection} for the specified {@code url}.
+     *
+     * @param url The url for the connection
+     * @return An open connection
+     * @throws IOException in case of a problem or the connection was aborted
      */
     protected HttpURLConnection createConnection(URL url) throws IOException {
         return (HttpURLConnection) url.openConnection();
@@ -171,9 +179,10 @@ public class HurlStack implements HttpStack {
 
     /**
      * Opens an {@link HttpURLConnection} with parameters.
-     * @param url
+     *
+     * @param url The url for the connection
      * @return an open connection
-     * @throws IOException
+     * @throws IOException in case of a problem or the connection was aborted
      */
     private HttpURLConnection openConnection(URL url, Request<?> request) throws IOException {
         HttpURLConnection connection = createConnection(url);
@@ -192,6 +201,14 @@ public class HurlStack implements HttpStack {
         return connection;
     }
 
+    /**
+     * Sets the connection parameters for the request.
+     *
+     * @param connection A connection
+     * @param request A request
+     * @throws IOException in case of a problem or the connection was aborted
+     * @throws AuthFailureError as authentication may be required to provide these values
+     */
     @SuppressWarnings("deprecation")
     /* package */ static void setConnectionParametersForRequest(HttpURLConnection connection,
             Request<?> request) throws IOException, AuthFailureError {
@@ -248,6 +265,14 @@ public class HurlStack implements HttpStack {
         }
     }
 
+    /**
+     * Adds a body to the request
+     *
+     * @param connection A connection
+     * @param request A request
+     * @throws IOException in case of a problem or the connection was aborted
+     * @throws AuthFailureError as authentication may be required to provide these values
+     */
     private static void addBodyIfExists(HttpURLConnection connection, Request<?> request)
             throws IOException, AuthFailureError {
         byte[] body = request.getBody();
