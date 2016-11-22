@@ -4,9 +4,9 @@ apply plugin: 'com.android.library'
 
 // Check if the android plugin version supports unit testing.
 if (configurations.findByName("testCompile")) {
-  dependencies {
-    testCompile "junit:junit:4.12"
-    testCompile "org.mockito:mockito-core:2.2.21"
-    testCompile "org.robolectric:robolectric:3.1"
-  }
+    dependencies {
+        testCompile "junit:junit:4.12"
+        testCompile "org.mockito:mockito-core:2.2.21"
+        testCompile "org.robolectric:robolectric:3.1"
+    }
 }

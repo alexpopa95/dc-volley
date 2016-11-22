@@ -190,7 +190,7 @@ public class HttpClientStack implements HttpStack {
 
     /**
      * Called before the request is executed using the underlying HttpClient.
-     * <p>
+     *
      * <p>Overwrite in subclasses to augment the request.</p>
      *
      * @param request The request
