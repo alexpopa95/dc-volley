@@ -19,12 +19,14 @@ public class NetworkImageViewTest {
     private NetworkImageView mNIV;
     private MockImageLoader mMockImageLoader;
 
-    @Before public void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         mMockImageLoader = new MockImageLoader();
         mNIV = new NetworkImageView(RuntimeEnvironment.application);
     }
 
-    @Test public void setImageUrl_requestsImage() {
+    @Test
+    public void setImageUrl_requestsImage() {
         mNIV.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
         mNIV.setImageUrl("http://foo", mMockImageLoader);
         assertEquals("http://foo", mMockImageLoader.lastRequestUrl);
@@ -47,7 +49,7 @@ public class NetworkImageViewTest {
         public int lastMaxHeight;
 
         public ImageContainer get(String requestUrl, ImageListener imageListener, int maxWidth,
-                int maxHeight, ScaleType scaleType) {
+                                  int maxHeight, ScaleType scaleType) {
             lastRequestUrl = requestUrl;
             lastMaxWidth = maxWidth;
             lastMaxHeight = maxHeight;

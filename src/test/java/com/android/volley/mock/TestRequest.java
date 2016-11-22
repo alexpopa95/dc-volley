@@ -26,7 +26,9 @@ import java.util.Map;
 public class TestRequest {
     private static final String TEST_URL = "http://foo.com";
 
-    /** Base Request class for testing allowing both the deprecated and new constructor. */
+    /**
+     * Base Request class for testing allowing both the deprecated and new constructor.
+     */
     private static class Base extends Request<byte[]> {
         @SuppressWarnings("deprecation")
         public Base(String url, Response.ErrorListener listener) {
@@ -47,14 +49,18 @@ public class TestRequest {
         }
     }
 
-    /** Test example of a GET request in the deprecated style. */
+    /**
+     * Test example of a GET request in the deprecated style.
+     */
     public static class DeprecatedGet extends Base {
         public DeprecatedGet() {
             super(TEST_URL, null);
         }
     }
 
-    /** Test example of a POST request in the deprecated style. */
+    /**
+     * Test example of a POST request in the deprecated style.
+     */
     public static class DeprecatedPost extends Base {
         private Map<String, String> mPostParams;
 
@@ -70,7 +76,9 @@ public class TestRequest {
         }
     }
 
-    /** Test example of a GET request in the new style. */
+    /**
+     * Test example of a GET request in the new style.
+     */
     public static class Get extends Base {
         public Get() {
             super(Method.GET, TEST_URL, null);
@@ -87,7 +95,9 @@ public class TestRequest {
         }
     }
 
-    /** Test example of a POST request in the new style with a body. */
+    /**
+     * Test example of a POST request in the new style with a body.
+     */
     public static class PostWithBody extends Post {
         private Map<String, String> mParams;
 
@@ -112,7 +122,9 @@ public class TestRequest {
         }
     }
 
-    /** Test example of a PUT request in the new style with a body. */
+    /**
+     * Test example of a PUT request in the new style with a body.
+     */
     public static class PutWithBody extends Put {
         private Map<String, String> mParams = new HashMap<String, String>();
 
@@ -127,42 +139,54 @@ public class TestRequest {
         }
     }
 
-    /** Test example of a DELETE request in the new style. */
+    /**
+     * Test example of a DELETE request in the new style.
+     */
     public static class Delete extends Base {
         public Delete() {
             super(Method.DELETE, TEST_URL, null);
         }
     }
 
-    /** Test example of a HEAD request in the new style. */
+    /**
+     * Test example of a HEAD request in the new style.
+     */
     public static class Head extends Base {
         public Head() {
             super(Method.HEAD, TEST_URL, null);
         }
     }
 
-    /** Test example of a OPTIONS request in the new style. */
+    /**
+     * Test example of a OPTIONS request in the new style.
+     */
     public static class Options extends Base {
         public Options() {
             super(Method.OPTIONS, TEST_URL, null);
         }
     }
 
-    /** Test example of a TRACE request in the new style. */
+    /**
+     * Test example of a TRACE request in the new style.
+     */
     public static class Trace extends Base {
         public Trace() {
             super(Method.TRACE, TEST_URL, null);
         }
     }
 
-    /** Test example of a PATCH request in the new style. */
+    /**
+     * Test example of a PATCH request in the new style.
+     */
     public static class Patch extends Base {
         public Patch() {
             super(Method.PATCH, TEST_URL, null);
         }
     }
 
-    /** Test example of a PATCH request in the new style with a body. */
+    /**
+     * Test example of a PATCH request in the new style with a body.
+     */
     public static class PatchWithBody extends Patch {
         private Map<String, String> mParams = new HashMap<String, String>();
 

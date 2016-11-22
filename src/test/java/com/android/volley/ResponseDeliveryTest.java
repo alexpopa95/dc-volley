@@ -35,7 +35,8 @@ public class ResponseDeliveryTest {
     private MockRequest mRequest;
     private Response<byte[]> mSuccessResponse;
 
-    @Before public void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         // Make the delivery just run its posted responses immediately.
         mDelivery = new ImmediateResponseDelivery();
         mRequest = new MockRequest();
@@ -45,20 +46,23 @@ public class ResponseDeliveryTest {
         mSuccessResponse = Response.success(data, cacheEntry);
     }
 
-    @Test public void postResponseCallsDeliverResponse() {
+    @Test
+    public void postResponseCallsDeliverResponse() {
         mDelivery.postResponse(mRequest, mSuccessResponse);
         assertTrue(mRequest.deliverResponse_called);
         assertFalse(mRequest.deliverError_called);
     }
 
-    @Test public void postResponseSuppressesCanceled() {
+    @Test
+    public void postResponseSuppressesCanceled() {
         mRequest.cancel();
         mDelivery.postResponse(mRequest, mSuccessResponse);
         assertFalse(mRequest.deliverResponse_called);
         assertFalse(mRequest.deliverError_called);
     }
 
-    @Test public void postErrorCallsDeliverError() {
+    @Test
+    public void postErrorCallsDeliverError() {
         Response<byte[]> errorResponse = Response.error(new ServerError());
 
         mDelivery.postResponse(mRequest, errorResponse);

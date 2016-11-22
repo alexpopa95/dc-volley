@@ -28,8 +28,9 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
 public class RequestTest {
-    
-    @Test public void compareTo() {
+
+    @Test
+    public void compareTo() {
         int sequence = 0;
         TestRequest low = new TestRequest(Priority.LOW);
         low.setSequence(sequence++);
@@ -50,6 +51,7 @@ public class RequestTest {
 
     private class TestRequest extends Request<Object> {
         private Priority mPriority = Priority.NORMAL;
+
         public TestRequest(Priority priority) {
             super(Request.Method.GET, "", null);
             mPriority = priority;
@@ -70,7 +72,8 @@ public class RequestTest {
         }
     }
 
-    @Test public void urlParsing() {
+    @Test
+    public void urlParsing() {
         UrlParseRequest nullUrl = new UrlParseRequest(null);
         assertEquals(0, nullUrl.getTrafficStatsTag());
         UrlParseRequest emptyUrl = new UrlParseRequest("");

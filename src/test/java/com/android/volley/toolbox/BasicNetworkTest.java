@@ -36,7 +36,8 @@ import static org.junit.Assert.assertEquals;
 @RunWith(RobolectricTestRunner.class)
 public class BasicNetworkTest {
 
-    @Test public void headersAndPostParams() throws Exception {
+    @Test
+    public void headersAndPostParams() throws Exception {
         MockHttpStack mockHttpStack = new MockHttpStack();
         BasicHttpResponse fakeResponse = new BasicHttpResponse(new ProtocolVersion("HTTP", 1, 1),
                 200, "OK");

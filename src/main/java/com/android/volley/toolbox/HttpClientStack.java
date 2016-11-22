@@ -64,7 +64,7 @@ public class HttpClientStack implements HttpStack {
      * Adds the headers to the request.
      *
      * @param httpRequest The request
-     * @param headers The Map of headers
+     * @param headers     The Map of headers
      */
     private static void addHeaders(HttpUriRequest httpRequest, Map<String, String> headers) {
         for (String key : headers.keySet()) {
@@ -76,7 +76,6 @@ public class HttpClientStack implements HttpStack {
      * Returns the list of the POST parameters of the request.
      *
      * @param postParams The POST parameters
-     *
      * @return a List of POST parameters
      */
     @SuppressWarnings("unused")
@@ -89,12 +88,11 @@ public class HttpClientStack implements HttpStack {
     }
 
     /**
-     *
-     * @param request the request to perform
+     * @param request           the request to perform
      * @param additionalHeaders additional headers to be sent together with
-     *         {@link Request#getHeaders()}
+     *                          {@link Request#getHeaders()}
      * @return the response resulting from the given request
-     * @throws IOException in case of a problem or the connection was aborted
+     * @throws IOException      in case of a problem or the connection was aborted
      * @throws AuthFailureError as authentication may be required to provide these values
      */
     @Override
@@ -116,14 +114,14 @@ public class HttpClientStack implements HttpStack {
     /**
      * Creates the appropriate subclass of HttpUriRequest for passed in request.
      *
-     * @param request The request to subclass
+     * @param request           The request to subclass
      * @param additionalHeaders The additional header entries
      * @return The final request
      * @throws AuthFailureError as authentication may be required to provide these values
      */
     @SuppressWarnings("deprecation")
     /* protected */ static HttpUriRequest createHttpRequest(Request<?> request,
-            Map<String, String> additionalHeaders) throws AuthFailureError {
+                                                            Map<String, String> additionalHeaders) throws AuthFailureError {
         switch (request.getMethod()) {
             case Method.DEPRECATED_GET_OR_POST: {
                 // This is the deprecated way that needs to be handled for backwards compatibility.
@@ -178,11 +176,11 @@ public class HttpClientStack implements HttpStack {
      * Adds an {@link HttpEntity} entity to the request if the body is not null.
      *
      * @param httpRequest The http request
-     * @param request The request
+     * @param request     The request
      * @throws AuthFailureError as authentication may be required to provide these values.
      */
     private static void setEntityIfNonEmptyBody(HttpEntityEnclosingRequestBase httpRequest,
-            Request<?> request) throws AuthFailureError {
+                                                Request<?> request) throws AuthFailureError {
         byte[] body = request.getBody();
         if (body != null) {
             HttpEntity entity = new ByteArrayEntity(body);
@@ -192,7 +190,7 @@ public class HttpClientStack implements HttpStack {
 
     /**
      * Called before the request is executed using the underlying HttpClient.
-     *
+     * <p>
      * <p>Overwrite in subclasses to augment the request.</p>
      *
      * @param request The request

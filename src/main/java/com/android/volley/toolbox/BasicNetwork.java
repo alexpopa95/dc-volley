@@ -76,7 +76,7 @@ public class BasicNetwork implements Network {
 
     /**
      * @param httpStack HTTP stack to be used
-     * @param pool a buffer pool that improves GC performance in copy operations
+     * @param pool      a buffer pool that improves GC performance in copy operations
      */
     public BasicNetwork(HttpStack httpStack, ByteArrayPool pool) {
         mHttpStack = httpStack;
@@ -118,20 +118,20 @@ public class BasicNetwork implements Network {
                             entry.responseHeaders, true,
                             SystemClock.elapsedRealtime() - requestStart);
                 }
-                
+
                 // Handle moved resources
                 if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY || statusCode == HttpStatus.SC_MOVED_TEMPORARILY) {
-                	String newUrl = responseHeaders.get("Location");
-                	request.setRedirectUrl(newUrl);
+                    String newUrl = responseHeaders.get("Location");
+                    request.setRedirectUrl(newUrl);
                 }
 
                 // Some responses such as 204s do not have content.  We must check.
                 if (httpResponse.getEntity() != null) {
-                  responseContents = entityToBytes(httpResponse.getEntity());
+                    responseContents = entityToBytes(httpResponse.getEntity());
                 } else {
-                  // Add 0 byte response as a way of honestly representing a
-                  // no-content request.
-                  responseContents = new byte[0];
+                    // Add 0 byte response as a way of honestly representing a
+                    // no-content request.
+                    responseContents = new byte[0];
                 }
 
                 // if the request is slow, log it.
@@ -157,11 +157,11 @@ public class BasicNetwork implements Network {
                 } else {
                     throw new NoConnectionError(e);
                 }
-                if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY || 
-                		statusCode == HttpStatus.SC_MOVED_TEMPORARILY) {
-                	VolleyLog.e("Request at %s has been redirected to %s", request.getOriginUrl(), request.getUrl());
+                if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY ||
+                        statusCode == HttpStatus.SC_MOVED_TEMPORARILY) {
+                    VolleyLog.e("Request at %s has been redirected to %s", request.getOriginUrl(), request.getUrl());
                 } else {
-                	VolleyLog.e("Unexpected response code %d for %s", statusCode, request.getUrl());
+                    VolleyLog.e("Unexpected response code %d for %s", statusCode, request.getUrl());
                 }
                 if (responseContents != null) {
                     networkResponse = new NetworkResponse(statusCode, responseContents,
@@ -170,8 +170,8 @@ public class BasicNetwork implements Network {
                             statusCode == HttpStatus.SC_FORBIDDEN) {
                         attemptRetryOnException("auth",
                                 request, new AuthFailureError(networkResponse));
-                    } else if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY || 
-                    			statusCode == HttpStatus.SC_MOVED_TEMPORARILY) {
+                    } else if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY ||
+                            statusCode == HttpStatus.SC_MOVED_TEMPORARILY) {
                         attemptRetryOnException("redirect",
                                 request, new RedirectError(networkResponse));
                     } else {
@@ -189,10 +189,10 @@ public class BasicNetwork implements Network {
      * Logs requests that took over SLOW_REQUEST_THRESHOLD_MS to complete.
      */
     private void logSlowRequests(long requestLifetime, Request<?> request,
-            byte[] responseContents, StatusLine statusLine) {
+                                 byte[] responseContents, StatusLine statusLine) {
         if (DEBUG || requestLifetime > SLOW_REQUEST_THRESHOLD_MS) {
             VolleyLog.d("HTTP response for request=<%s> [lifetime=%d], [size=%s], " +
-                    "[rc=%d], [retryCount=%s]", request, requestLifetime,
+                            "[rc=%d], [retryCount=%s]", request, requestLifetime,
                     responseContents != null ? responseContents.length : "null",
                     statusLine.getStatusCode(), request.getRetryPolicy().getCurrentRetryCount());
         }
@@ -201,10 +201,11 @@ public class BasicNetwork implements Network {
     /**
      * Attempts to prepare the request for a retry. If there are no more attempts remaining in the
      * request's retry policy, a timeout exception is thrown.
+     *
      * @param request The request to use.
      */
     private static void attemptRetryOnException(String logPrefix, Request<?> request,
-            VolleyError exception) throws VolleyError {
+                                                VolleyError exception) throws VolleyError {
         RetryPolicy retryPolicy = request.getRetryPolicy();
         int oldTimeout = request.getTimeoutMs();
 
@@ -239,7 +240,9 @@ public class BasicNetwork implements Network {
         VolleyLog.v("HTTP ERROR(%s) %d ms to fetch %s", what, (now - start), url);
     }
 
-    /** Reads the contents of HttpEntity into a byte[]. */
+    /**
+     * Reads the contents of HttpEntity into a byte[].
+     */
     private byte[] entityToBytes(HttpEntity entity) throws IOException, ServerError {
         PoolingByteArrayOutputStream bytes =
                 new PoolingByteArrayOutputStream(mPool, (int) entity.getContentLength());

@@ -34,11 +34,13 @@ public class HurlStackTest {
 
     private MockHttpURLConnection mMockConnection;
 
-    @Before public void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         mMockConnection = new MockHttpURLConnection();
     }
 
-    @Test public void connectionForDeprecatedGetRequest() throws Exception {
+    @Test
+    public void connectionForDeprecatedGetRequest() throws Exception {
         TestRequest.DeprecatedGet request = new TestRequest.DeprecatedGet();
         assertEquals(request.getMethod(), Method.DEPRECATED_GET_OR_POST);
 
@@ -47,7 +49,8 @@ public class HurlStackTest {
         assertFalse(mMockConnection.getDoOutput());
     }
 
-    @Test public void connectionForDeprecatedPostRequest() throws Exception {
+    @Test
+    public void connectionForDeprecatedPostRequest() throws Exception {
         TestRequest.DeprecatedPost request = new TestRequest.DeprecatedPost();
         assertEquals(request.getMethod(), Method.DEPRECATED_GET_OR_POST);
 
@@ -56,7 +59,8 @@ public class HurlStackTest {
         assertTrue(mMockConnection.getDoOutput());
     }
 
-    @Test public void connectionForGetRequest() throws Exception {
+    @Test
+    public void connectionForGetRequest() throws Exception {
         TestRequest.Get request = new TestRequest.Get();
         assertEquals(request.getMethod(), Method.GET);
 
@@ -65,7 +69,8 @@ public class HurlStackTest {
         assertFalse(mMockConnection.getDoOutput());
     }
 
-    @Test public void connectionForPostRequest() throws Exception {
+    @Test
+    public void connectionForPostRequest() throws Exception {
         TestRequest.Post request = new TestRequest.Post();
         assertEquals(request.getMethod(), Method.POST);
 
@@ -74,7 +79,8 @@ public class HurlStackTest {
         assertFalse(mMockConnection.getDoOutput());
     }
 
-    @Test public void connectionForPostWithBodyRequest() throws Exception {
+    @Test
+    public void connectionForPostWithBodyRequest() throws Exception {
         TestRequest.PostWithBody request = new TestRequest.PostWithBody();
         assertEquals(request.getMethod(), Method.POST);
 
@@ -83,7 +89,8 @@ public class HurlStackTest {
         assertTrue(mMockConnection.getDoOutput());
     }
 
-    @Test public void connectionForPutRequest() throws Exception {
+    @Test
+    public void connectionForPutRequest() throws Exception {
         TestRequest.Put request = new TestRequest.Put();
         assertEquals(request.getMethod(), Method.PUT);
 
@@ -92,7 +99,8 @@ public class HurlStackTest {
         assertFalse(mMockConnection.getDoOutput());
     }
 
-    @Test public void connectionForPutWithBodyRequest() throws Exception {
+    @Test
+    public void connectionForPutWithBodyRequest() throws Exception {
         TestRequest.PutWithBody request = new TestRequest.PutWithBody();
         assertEquals(request.getMethod(), Method.PUT);
 
@@ -101,7 +109,8 @@ public class HurlStackTest {
         assertTrue(mMockConnection.getDoOutput());
     }
 
-    @Test public void connectionForDeleteRequest() throws Exception {
+    @Test
+    public void connectionForDeleteRequest() throws Exception {
         TestRequest.Delete request = new TestRequest.Delete();
         assertEquals(request.getMethod(), Method.DELETE);
 
@@ -110,7 +119,8 @@ public class HurlStackTest {
         assertFalse(mMockConnection.getDoOutput());
     }
 
-    @Test public void connectionForHeadRequest() throws Exception {
+    @Test
+    public void connectionForHeadRequest() throws Exception {
         TestRequest.Head request = new TestRequest.Head();
         assertEquals(request.getMethod(), Method.HEAD);
 
@@ -119,7 +129,8 @@ public class HurlStackTest {
         assertFalse(mMockConnection.getDoOutput());
     }
 
-    @Test public void connectionForOptionsRequest() throws Exception {
+    @Test
+    public void connectionForOptionsRequest() throws Exception {
         TestRequest.Options request = new TestRequest.Options();
         assertEquals(request.getMethod(), Method.OPTIONS);
 
@@ -128,7 +139,8 @@ public class HurlStackTest {
         assertFalse(mMockConnection.getDoOutput());
     }
 
-    @Test public void connectionForTraceRequest() throws Exception {
+    @Test
+    public void connectionForTraceRequest() throws Exception {
         TestRequest.Trace request = new TestRequest.Trace();
         assertEquals(request.getMethod(), Method.TRACE);
 
@@ -137,7 +149,8 @@ public class HurlStackTest {
         assertFalse(mMockConnection.getDoOutput());
     }
 
-    @Test public void connectionForPatchRequest() throws Exception {
+    @Test
+    public void connectionForPatchRequest() throws Exception {
         TestRequest.Patch request = new TestRequest.Patch();
         assertEquals(request.getMethod(), Method.PATCH);
 
@@ -146,7 +159,8 @@ public class HurlStackTest {
         assertFalse(mMockConnection.getDoOutput());
     }
 
-    @Test public void connectionForPatchWithBodyRequest() throws Exception {
+    @Test
+    public void connectionForPatchWithBodyRequest() throws Exception {
         TestRequest.PatchWithBody request = new TestRequest.PatchWithBody();
         assertEquals(request.getMethod(), Method.PATCH);
 

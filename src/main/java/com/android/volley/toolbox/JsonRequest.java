@@ -32,12 +32,16 @@ import java.io.UnsupportedEncodingException;
  * @param <T> JSON type of response expected
  */
 public abstract class JsonRequest<T> extends Request<T> {
-    /** Default charset for JSON request. */
+    /**
+     * Default charset for JSON request.
+     */
     protected static final String PROTOCOL_CHARSET = "utf-8";
 
-    /** Content type for request. */
+    /**
+     * Content type for request.
+     */
     private static final String PROTOCOL_CONTENT_TYPE =
-        String.format("application/json; charset=%s", PROTOCOL_CHARSET);
+            String.format("application/json; charset=%s", PROTOCOL_CHARSET);
 
     private Listener<T> mListener;
     private final String mRequestBody;
@@ -46,29 +50,29 @@ public abstract class JsonRequest<T> extends Request<T> {
      * Deprecated constructor for a JsonRequest which defaults to GET unless {@link #getPostBody()}
      * or {@link #getPostParams()} is overridden (which defaults to POST).
      *
-     * @param url URL to fetch the JSON from
-     * @param requestBody A {@link String} to post with the request. Null is allowed and
-     *   indicates no parameters will be posted along with request.
-     * @param listener Listener to receive the JSON response
+     * @param url           URL to fetch the JSON from
+     * @param requestBody   A {@link String} to post with the request. Null is allowed and
+     *                      indicates no parameters will be posted along with request.
+     * @param listener      Listener to receive the JSON response
      * @param errorListener Error listener, or null to ignore errors.
      */
     public JsonRequest(String url, String requestBody, Listener<T> listener,
-            ErrorListener errorListener) {
+                       ErrorListener errorListener) {
         this(Method.DEPRECATED_GET_OR_POST, url, requestBody, listener, errorListener);
     }
 
     /**
      * Creates a new request.
      *
-     * @param method the HTTP method to use
-     * @param url URL to fetch the JSON from
-     * @param requestBody A {@link String} to post with the request. Null is allowed and
-     *   indicates no parameters will be posted along with request.
-     * @param listener Listener to receive the JSON response
+     * @param method        the HTTP method to use
+     * @param url           URL to fetch the JSON from
+     * @param requestBody   A {@link String} to post with the request. Null is allowed and
+     *                      indicates no parameters will be posted along with request.
+     * @param listener      Listener to receive the JSON response
      * @param errorListener Error listener, or null to ignore errors.
      */
     public JsonRequest(int method, String url, String requestBody, Listener<T> listener,
-            ErrorListener errorListener) {
+                       ErrorListener errorListener) {
         super(method, url, errorListener);
         mListener = listener;
         mRequestBody = requestBody;

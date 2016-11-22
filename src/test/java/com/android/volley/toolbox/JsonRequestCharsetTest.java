@@ -51,7 +51,8 @@ public class JsonRequestCharsetTest {
     private static final String COPY_NAME = "copyright";
     private static final int COPY_INDEX = 1;
 
-    @Test public void defaultCharsetJsonObject() throws Exception {
+    @Test
+    public void defaultCharsetJsonObject() throws Exception {
         // UTF-8 is default charset for JSON
         byte[] data = jsonObjectString().getBytes(Charset.forName("UTF-8"));
         NetworkResponse network = new NetworkResponse(data);
@@ -64,7 +65,8 @@ public class JsonRequestCharsetTest {
         assertEquals(COPY_VALUE, objectResponse.result.getString(COPY_NAME));
     }
 
-    @Test public void defaultCharsetJsonArray() throws Exception {
+    @Test
+    public void defaultCharsetJsonArray() throws Exception {
         // UTF-8 is default charset for JSON
         byte[] data = jsonArrayString().getBytes(Charset.forName("UTF-8"));
         NetworkResponse network = new NetworkResponse(data);
@@ -77,7 +79,8 @@ public class JsonRequestCharsetTest {
         assertEquals(COPY_VALUE, arrayResponse.result.getString(COPY_INDEX));
     }
 
-    @Test public void specifiedCharsetJsonObject() throws Exception {
+    @Test
+    public void specifiedCharsetJsonObject() throws Exception {
         byte[] data = jsonObjectString().getBytes(Charset.forName("ISO-8859-1"));
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Content-Type", "application/json; charset=iso-8859-1");
@@ -91,7 +94,8 @@ public class JsonRequestCharsetTest {
         assertEquals(COPY_VALUE, objectResponse.result.getString(COPY_NAME));
     }
 
-    @Test public void specifiedCharsetJsonArray() throws Exception {
+    @Test
+    public void specifiedCharsetJsonArray() throws Exception {
         byte[] data = jsonArrayString().getBytes(Charset.forName("ISO-8859-2"));
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Content-Type", "application/json; charset=iso-8859-2");

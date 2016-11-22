@@ -41,14 +41,17 @@ import static org.mockito.MockitoAnnotations.initMocks;
 public class RequestQueueTest {
 
     private ResponseDelivery mDelivery;
-    @Mock private Network mMockNetwork;
+    @Mock
+    private Network mMockNetwork;
 
-    @Before public void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         mDelivery = new ImmediateResponseDelivery();
         initMocks(this);
     }
 
-    @Test public void cancelAll_onlyCorrectTag() throws Exception {
+    @Test
+    public void cancelAll_onlyCorrectTag() throws Exception {
         RequestQueue queue = new RequestQueue(new NoCache(), mMockNetwork, 0, mDelivery);
         Object tagA = new Object();
         Object tagB = new Object();

@@ -49,7 +49,7 @@ public class PoolingByteArrayOutputStream extends ByteArrayOutputStream {
      *
      * @param pool the ByteArrayPool pool
      * @param size initial size for the underlying byte array. The value will be pinned to a default
-     *        minimum size.
+     *             minimum size.
      */
     public PoolingByteArrayOutputStream(ByteArrayPool pool, int size) {
         mPool = pool;
