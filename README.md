@@ -1,6 +1,6 @@
-DCVolley
+<img src="https://s21.postimg.org/mqzse00af/dc_volley_logo.png" width="80px" align="left" alt="DCVolley"/><h1>DCVolley<h1/>
+
 ==========
-![](https://corporate.doveconviene.it/wp-content/uploads/2015/07/logo-it-low.png)
 
 Library Project improvements to [Volley](https://android.googlesource.com/platform/frameworks/volley) made by [DoveConviene](https://www.doveconviene.it) Android Team.
 
@@ -18,6 +18,12 @@ dependencies {
 }
 
 ```
+
+==========
+
+## Powered By
+
+![](https://corporate.doveconviene.it/wp-content/uploads/2015/07/logo-it-low.png)
 
 ## License
 
