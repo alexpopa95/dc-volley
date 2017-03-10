@@ -260,7 +260,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
     /**
      * Notifies the request queue that this request has finished (successfully or with error).
-     * <p>
+     *
      * <p>Also dumps all events from this request's event log; for debugging.</p>
      */
     void finish(final String tag) {
@@ -430,7 +430,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * Returns a Map of POST parameters to be used for this request, or null if
      * a simple GET should be used.  Can throw {@link AuthFailureError} as
      * authentication may be required to provide these values.
-     * <p>
+     *
      * <p>Note that only one of getPostParams() and getPostBody() can return a non-null
      * value.</p>
      *
@@ -446,7 +446,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     /**
      * Returns which encoding should be used when converting POST parameters returned by
      * {@link #getPostParams()} into a raw POST body.
-     * <p>
+     *
      * <p>This controls both encodings:
      * <ol>
      * <li>The string encoding used when converting parameter names and values into bytes prior
@@ -497,7 +497,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     /**
      * Returns a Map of parameters to be used for a POST or PUT request.  Can throw
      * {@link AuthFailureError} as authentication may be required to provide these values.
-     * <p>
+     *
      * <p>Note that you can directly override {@link #getBody()} for custom data.</p>
      *
      * @return a Map of POST parameters
@@ -510,7 +510,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     /**
      * Returns which encoding should be used when converting POST or PUT parameters returned by
      * {@link #getParams()} into a raw POST or PUT body.
-     * <p>
+     *
      * <p>This controls both encodings:
      * <ol>
      * <li>The string encoding used when converting parameter names and values into bytes prior
@@ -536,7 +536,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
     /**
      * Returns the raw POST or PUT body to be sent.
-     * <p>
+     *
      * <p>By default, the body consists of the request parameters in
      * application/x-www-form-urlencoded format. When overriding this method, consider overriding
      * {@link #getBodyContentType()} as well to match the new body format.
@@ -666,7 +666,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
     /**
      * Subclasses can override this method to parse 'networkError' and return a more specific error.
-     * <p>
+     *
      * <p>The default implementation just returns the passed 'networkError'.</p>
      *
      * @param volleyError the error retrieved from the network
