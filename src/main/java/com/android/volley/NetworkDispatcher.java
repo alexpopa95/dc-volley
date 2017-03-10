@@ -124,7 +124,7 @@ public class NetworkDispatcher extends Thread {
 
                 //Not Local images
                 NetworkResponse networkResponse;
-                if (Request.isFile(request.getUrl())) {
+                if (!Request.isFile(request.getUrl())) {
                     // Perform the network request.
                     networkResponse = mNetwork.performRequest(request);
                     request.addMarker("network-http-complete");
