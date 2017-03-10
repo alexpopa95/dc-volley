@@ -16,7 +16,6 @@
 
 package com.android.volley.toolbox;
 
-import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
@@ -51,8 +50,6 @@ public class ImageRequest extends Request<Bitmap> {
      * Default backoff multiplier for image requests
      */
     private static final float IMAGE_BACKOFF_MULT = 2f;
-
-    public static final String SCHEME_FILE = ContentResolver.SCHEME_FILE;
 
     private final Response.Listener<Bitmap> mListener;
     private final Config mDecodeConfig;
@@ -179,7 +176,7 @@ public class ImageRequest extends Request<Bitmap> {
         // Serialize all decode on a global lock to reduce concurrent heap usage.
         synchronized (sDecodeLock) {
             try {
-                if (getUrl().startsWith(SCHEME_FILE)) {
+                if (isFile(getUrl())) {
                     return doFileParse();
                 }
                 return doParse(response);
