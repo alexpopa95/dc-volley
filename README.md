@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-  compile "it.doveconviene.volley:dc-volley:1.2.0
+  compile "it.doveconviene.volley:dc-volley:1.2.1"
 }
 
 ```
