@@ -16,6 +16,8 @@
 
 package com.android.volley.toolbox;
 
+import android.graphics.Bitmap;
+
 import com.android.volley.Cache;
 import com.android.volley.NetworkResponse;
 
@@ -23,6 +25,7 @@ import org.apache.http.impl.cookie.DateParseException;
 import org.apache.http.impl.cookie.DateUtils;
 import org.apache.http.protocol.HTTP;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Map;
 
 /**
@@ -118,6 +121,24 @@ public class HttpHeaderParser {
         entry.responseHeaders = headers;
 
         return entry;
+    }
+
+    /**
+     * Extracts a {@link Cache.Entry} from a {@link NetworkResponse}.
+     * Cache-control headers are ignored. SoftTtl == 3 mins, ttl == 24 hours.
+     *
+     * @param bitmap The network response to parse headers from
+     * @return a cache entry for the given response, or null if the response is not cacheable.
+     */
+    public static Cache.Entry parseBitmapCacheHeaders(Bitmap bitmap) {
+        NetworkResponse response = null;
+        if (null != bitmap) {
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 70, stream);
+            byte[] byteArray = stream.toByteArray();
+            response = new NetworkResponse(byteArray);
+        }
+        return parseCacheHeaders(response);
     }
 
     /**

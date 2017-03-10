@@ -16,6 +16,7 @@
 
 package com.android.volley.toolbox;
 
+import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
@@ -27,6 +28,9 @@ import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyLog;
+
+import java.io.File;
+import java.io.FileNotFoundException;
 
 /**
  * A canned request for getting an image at a given URL and calling
@@ -47,6 +51,8 @@ public class ImageRequest extends Request<Bitmap> {
      * Default backoff multiplier for image requests
      */
     private static final float IMAGE_BACKOFF_MULT = 2f;
+
+    public static final String SCHEME_FILE = ContentResolver.SCHEME_FILE;
 
     private final Response.Listener<Bitmap> mListener;
     private final Config mDecodeConfig;
@@ -173,11 +179,79 @@ public class ImageRequest extends Request<Bitmap> {
         // Serialize all decode on a global lock to reduce concurrent heap usage.
         synchronized (sDecodeLock) {
             try {
+                if (getUrl().startsWith(SCHEME_FILE)) {
+                    return doFileParse();
+                }
                 return doParse(response);
             } catch (OutOfMemoryError e) {
                 VolleyLog.e("Caught OOM for %d byte image, url=%s", response.data.length, getUrl());
                 return Response.error(new ParseError(e));
             }
+        }
+    }
+
+    /**
+     * The real guts of parseNetworkResponse. Broken out for readability.
+     * <p>
+     * This version is for reading a Bitmap from file
+     */
+    private Response<Bitmap> doFileParse() {
+
+        final String requestUrl = getUrl();
+        // Remove the 'file://' prefix
+        File bitmapFile = new File(requestUrl.substring(7, requestUrl.length()));
+
+        if (!bitmapFile.exists() || !bitmapFile.isFile()) {
+            return Response.error(new ParseError(new FileNotFoundException(
+                    String.format("File not found: %s",
+                            bitmapFile.getAbsolutePath()))));
+        }
+
+        BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
+        decodeOptions.inInputShareable = true;
+        decodeOptions.inPurgeable = true;
+        decodeOptions.inPreferredConfig = mDecodeConfig;
+        Bitmap bitmap;
+        if (mMaxWidth == 0 && mMaxHeight == 0) {
+
+            bitmap = BitmapFactory.decodeFile(bitmapFile.getAbsolutePath(), decodeOptions);
+            addMarker("read-full-size-image-from-file");
+        } else {
+            // If we have to resize this image, first get the natural bounds.
+            decodeOptions.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(bitmapFile.getAbsolutePath(), decodeOptions);
+            int actualWidth = decodeOptions.outWidth;
+            int actualHeight = decodeOptions.outHeight;
+
+            // Then compute the dimensions we would ideally like to decode to.
+            int desiredWidth = getResizedDimension(mMaxWidth, mMaxHeight,
+                    actualWidth, actualHeight, mScaleType);
+            int desiredHeight = getResizedDimension(mMaxHeight, mMaxWidth,
+                    actualHeight, actualWidth, mScaleType);
+
+            // Decode to the nearest power of two scaling factor.
+            decodeOptions.inJustDecodeBounds = false;
+            decodeOptions.inSampleSize = findBestSampleSize(actualWidth, actualHeight, desiredWidth, desiredHeight);
+            Bitmap tempBitmap = BitmapFactory.decodeFile(bitmapFile.getAbsolutePath(), decodeOptions);
+            addMarker(String.format("read-from-file-scaled-times-%d",
+                    decodeOptions.inSampleSize));
+            // If necessary, scale down to the maximal acceptable size.
+            if (tempBitmap != null
+                    && (tempBitmap.getWidth() > desiredWidth || tempBitmap.getHeight() > desiredHeight)) {
+                bitmap = Bitmap.createScaledBitmap(tempBitmap, desiredWidth,
+                        desiredHeight, true);
+                tempBitmap.recycle();
+                addMarker("scaling-read-from-file-bitmap");
+            } else {
+                bitmap = tempBitmap;
+            }
+
+        }
+
+        if (bitmap == null) {
+            return Response.error(new ParseError());
+        } else {
+            return Response.success(bitmap, HttpHeaderParser.parseBitmapCacheHeaders(bitmap));
         }
     }
 
