@@ -19,6 +19,7 @@ package com.android.volley.toolbox;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.widget.ImageView.ScaleType;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -30,6 +31,7 @@ import com.android.volley.VolleyLog;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Locale;
 
 /**
  * A canned request for getting an image at a given URL and calling
@@ -204,13 +206,9 @@ public class ImageRequest extends Request<Bitmap> {
                             bitmapFile.getAbsolutePath()))));
         }
 
-        BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
-        decodeOptions.inInputShareable = true;
-        decodeOptions.inPurgeable = true;
-        decodeOptions.inPreferredConfig = mDecodeConfig;
+        BitmapFactory.Options decodeOptions = makeBitmapOptions();
         Bitmap bitmap;
         if (mMaxWidth == 0 && mMaxHeight == 0) {
-
             bitmap = BitmapFactory.decodeFile(bitmapFile.getAbsolutePath(), decodeOptions);
             addMarker("read-full-size-image-from-file");
         } else {
@@ -228,10 +226,13 @@ public class ImageRequest extends Request<Bitmap> {
 
             // Decode to the nearest power of two scaling factor.
             decodeOptions.inJustDecodeBounds = false;
-            decodeOptions.inSampleSize = findBestSampleSize(actualWidth, actualHeight, desiredWidth, desiredHeight);
-            Bitmap tempBitmap = BitmapFactory.decodeFile(bitmapFile.getAbsolutePath(), decodeOptions);
-            addMarker(String.format("read-from-file-scaled-times-%d",
-                    decodeOptions.inSampleSize));
+            decodeOptions.inSampleSize =
+                    findBestSampleSize(actualWidth, actualHeight, desiredWidth, desiredHeight);
+            Bitmap tempBitmap =
+                    BitmapFactory.decodeFile(bitmapFile.getAbsolutePath(), decodeOptions);
+
+            addMarker(String.format(Locale.US, "read-from-file-scaled-times-%d", decodeOptions.inSampleSize));
+
             // If necessary, scale down to the maximal acceptable size.
             if (tempBitmap != null
                     && (tempBitmap.getWidth() > desiredWidth || tempBitmap.getHeight() > desiredHeight)) {
@@ -247,9 +248,9 @@ public class ImageRequest extends Request<Bitmap> {
 
         if (bitmap == null) {
             return Response.error(new ParseError());
-        } else {
-            return Response.success(bitmap, HttpHeaderParser.parseBitmapCacheHeaders(bitmap));
         }
+
+        return Response.success(bitmap, HttpHeaderParser.parseBitmapCacheHeaders(bitmap));
     }
 
     /**
@@ -257,10 +258,9 @@ public class ImageRequest extends Request<Bitmap> {
      */
     private Response<Bitmap> doParse(NetworkResponse response) {
         byte[] data = response.data;
-        BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
-        Bitmap bitmap = null;
+        BitmapFactory.Options decodeOptions = makeBitmapOptions();
+        Bitmap bitmap;
         if (mMaxWidth == 0 && mMaxHeight == 0) {
-            decodeOptions.inPreferredConfig = mDecodeConfig;
             bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, decodeOptions);
         } else {
             // If we have to resize this image, first get the natural bounds.
@@ -277,8 +277,6 @@ public class ImageRequest extends Request<Bitmap> {
 
             // Decode to the nearest power of two scaling factor.
             decodeOptions.inJustDecodeBounds = false;
-            // TODO(ficus): Do we need this or is it okay since API 8 doesn't support it?
-            // decodeOptions.inPreferQualityOverSpeed = PREFER_QUALITY_OVER_SPEED;
             decodeOptions.inSampleSize =
                     findBestSampleSize(actualWidth, actualHeight, desiredWidth, desiredHeight);
             Bitmap tempBitmap =
@@ -297,9 +295,25 @@ public class ImageRequest extends Request<Bitmap> {
 
         if (bitmap == null) {
             return Response.error(new ParseError(response));
-        } else {
-            return Response.success(bitmap, HttpHeaderParser.parseCacheHeaders(response));
         }
+
+        return Response.success(bitmap, HttpHeaderParser.parseCacheHeaders(response));
+    }
+
+    /**
+     * Creates the Bitmap decode options based on SDK version.
+     *
+     * @return the Bitmap options
+     */
+    @SuppressWarnings("deprecation")
+    private BitmapFactory.Options makeBitmapOptions() {
+        BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
+        if (Build.VERSION.SDK_INT <= 19) {
+            decodeOptions.inInputShareable = true;
+            decodeOptions.inPurgeable = true;
+        }
+        decodeOptions.inPreferredConfig = mDecodeConfig;
+        return decodeOptions;
     }
 
     @Override
