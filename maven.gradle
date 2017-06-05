@@ -7,7 +7,7 @@ ext {
     artifact = 'dc-volley'
 
     libraryDescription = 'A Library Project improvements to Volley'
-    libraryVersion = '1.2.4'
+    libraryVersion = '1.2.5'
 
     gitUrl = 'https://github.com/DoveConviene/dc-volley.git'
     siteUrl = 'https://github.com/DoveConviene/dc-volley'
