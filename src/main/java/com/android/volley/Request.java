@@ -747,7 +747,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     }
 
     public static boolean isResource(String url) {
-        return !TextUtils.isEmpty(url) && url.startsWith(SCHEME_FILE);
+        return !TextUtils.isEmpty(url) && url.startsWith(SCHEME_ANDROID_RESOURCE);
     }
 
     public static boolean isSpecial(String url) {
