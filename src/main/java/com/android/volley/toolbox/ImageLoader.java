@@ -27,9 +27,11 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Helper that handles loading and caching images from remote URLs.
@@ -185,6 +187,72 @@ public class ImageLoader {
 
         String cacheKey = getCacheKey(requestUrl, maxWidth, maxHeight, scaleType);
         return mCache.getBitmap(cacheKey) != null;
+    }
+
+    /**
+     * Returns a bitmap for the requested URL.
+     *
+     * @param requestUrl The URL of the image to be loaded.
+     * @return A bitmap object.
+     */
+    public Bitmap download(String requestUrl) {
+        return download(requestUrl, 0, 0);
+    }
+
+    /**
+     * Returns a bitmap for the requested URL.
+     *
+     * @param requestUrl The URL of the image to be loaded.
+     * @param maxWidth   The maximum width of the returned image.
+     * @param maxHeight  The maximum height of the returned image.
+     * @return A bitmap object.
+     */
+    public Bitmap download(String requestUrl, int maxWidth, int maxHeight) {
+        return download(requestUrl, maxWidth, maxHeight, ScaleType.CENTER_INSIDE);
+    }
+
+    /**
+     * Issues a synchronous bitmap request with the given URL if that image is not available
+     * in the cache, otherwise it returns the cached bitmap.
+     *
+     * @param requestUrl The url of the remote image
+     * @param maxWidth   The maximum width of the returned image.
+     * @param maxHeight  The maximum height of the returned image.
+     * @param scaleType  The ImageViews ScaleType used to calculate the needed image size.
+     * @return A bitmap object.
+     */
+    public Bitmap download(String requestUrl, int maxWidth, int maxHeight, ScaleType scaleType) {
+        // only fulfill requests that were initiated from the main thread.
+        throwIfNotOnMainThread();
+
+        final String cacheKey = getCacheKey(requestUrl, maxWidth, maxHeight, scaleType);
+
+        // Try to look up the request in the cache of remote images.
+        Bitmap cachedBitmap = mCache.getBitmap(cacheKey);
+        if (cachedBitmap != null) {
+            // Return the cached bitmap.
+            return cachedBitmap;
+        }
+
+        RequestFuture<Bitmap> response = RequestFuture.newFuture();
+        Request<Bitmap> newRequest = makeImageRequest(requestUrl, response, maxWidth, maxHeight,
+                scaleType, response);
+
+        mRequestQueue.add(newRequest);
+
+        Bitmap bitmap = null;
+        try {
+            bitmap = response.get();
+        } catch (InterruptedException | ExecutionException e) {
+            VolleyLog.e("Error downloading bitmap %s", requestUrl);
+        }
+        return bitmap;
+    }
+
+    protected Request<Bitmap> makeImageRequest(String requestUrl, Listener<Bitmap> listener,
+                                               int maxWidth, int maxHeight, ScaleType scaleType,
+                                               ErrorListener errorListener) {
+        return new ImageRequest(requestUrl, listener, maxWidth, maxHeight, scaleType, Config.RGB_565, errorListener);
     }
 
     /**
