@@ -120,9 +120,8 @@ public class NetworkDispatcher extends Thread {
 
                 addTrafficStatsTag(request);
 
-                //Not Local images
                 NetworkResponse networkResponse;
-                if (!Request.isSpecial(request.getUrl())) {
+                if (!Request.isFile(request.getUrl())) {
                     // Perform the network request.
                     networkResponse = mNetwork.performRequest(request);
                     request.addMarker("network-http-complete");
@@ -134,6 +133,7 @@ public class NetworkDispatcher extends Thread {
                         continue;
                     }
                 } else {
+                    // File
                     networkResponse = new NetworkResponse(0, null, null, false);
                 }
 
