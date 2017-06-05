@@ -218,6 +218,7 @@ public class ImageLoader {
      * @param requestUrl The url of the remote image
      * @param maxWidth   The maximum width of the returned image.
      * @param maxHeight  The maximum height of the returned image.
+     * @param scaleType     The ImageViews ScaleType used to calculate the needed image size.
      * @return A bitmap object.
      */
     public Bitmap download(String requestUrl, int maxWidth, int maxHeight, ScaleType scaleType) {

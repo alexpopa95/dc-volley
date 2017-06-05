@@ -30,6 +30,8 @@ import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.Map;
 
+import static android.content.ContentResolver.SCHEME_CONTENT;
+
 /**
  * Base class for all network requests.
  *
@@ -46,6 +48,11 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * File Scheme
      */
     private static final String SCHEME_FILE = ContentResolver.SCHEME_FILE;
+
+    /**
+     * Android Resource Scheme
+     */
+    public static final String SCHEME_ANDROID_RESOURCE = ContentResolver.SCHEME_ANDROID_RESOURCE;
 
     /**
      * Supported request methods.
@@ -737,5 +744,13 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
     public static boolean isFile(String url) {
         return !TextUtils.isEmpty(url) && url.startsWith(SCHEME_FILE);
+    }
+
+    public static boolean isResource(String url) {
+        return !TextUtils.isEmpty(url) && url.startsWith(SCHEME_FILE);
+    }
+
+    public static boolean isSpecial(String url) {
+        return isFile(url) || isResource(url);
     }
 }
