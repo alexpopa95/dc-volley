@@ -24,8 +24,11 @@ import android.os.Build;
 
 import com.android.volley.Network;
 import com.android.volley.RequestQueue;
+import com.android.volley.VolleyLog;
 
 import java.io.File;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 
 public class Volley {
 
@@ -45,23 +48,8 @@ public class Volley {
      */
     public static RequestQueue newRequestQueue(Context context, HttpStack stack, int maxDiskCacheBytes) {
         File cacheDir = new File(context.getCacheDir(), DEFAULT_CACHE_DIR);
-
-        String userAgent = "volley/0";
-        try {
-            String packageName = context.getPackageName();
-            PackageInfo info = context.getPackageManager().getPackageInfo(packageName, 0);
-            userAgent = packageName + "/" + info.versionCode;
-        } catch (NameNotFoundException e) {
-        }
-
         if (stack == null) {
-            if (Build.VERSION.SDK_INT >= 9) {
-                stack = new HurlStack();
-            } else {
-                // Prior to Gingerbread, HttpUrlConnection was unreliable.
-                // See: http://android-developers.blogspot.com/2011/09/androids-http-clients.html
-                stack = new HttpClientStack(AndroidHttpClient.newInstance(userAgent));
-            }
+            stack = makeHttpStack(context);
         }
 
         Network network = new BasicNetwork(stack);
@@ -78,6 +66,33 @@ public class Volley {
         queue.start();
 
         return queue;
+    }
+
+    private static String makeUserAgent(Context context) {
+        String userAgent = "volley/0";
+        try {
+            String packageName = context.getPackageName();
+            PackageInfo info = context.getPackageManager().getPackageInfo(packageName, 0);
+            userAgent = packageName + "/" + info.versionCode;
+        } catch (NameNotFoundException e) {
+            VolleyLog.e("Unable to create userAgent, use default");
+        }
+        return userAgent;
+    }
+
+    private static HttpStack makeHttpStack(Context context) {
+        if (Build.VERSION.SDK_INT < 9) {
+            String userAgent = makeUserAgent(context);
+            return new HttpClientStack(AndroidHttpClient.newInstance(userAgent));
+        }
+        if (Build.VERSION.SDK_INT >= 16 && Build.VERSION.SDK_INT <= 19) {
+            try {
+                return new HurlStack(null, new TLSSocketFactory());
+            } catch (KeyManagementException | NoSuchAlgorithmException e) {
+                VolleyLog.e("Could not create new stack for TLS v1.*");
+            }
+        }
+        return new HurlStack();
     }
 
     /**

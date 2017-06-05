@@ -22,8 +22,6 @@ import android.os.Build;
 import android.os.Process;
 import android.os.SystemClock;
 
-import com.android.volley.toolbox.ImageRequest;
-
 import java.util.concurrent.BlockingQueue;
 
 /**
