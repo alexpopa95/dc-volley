@@ -1,12 +1,12 @@
 /**
  * Copyright (C) 2013 The Android Open Source Project
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,7 +35,7 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * Helper that handles loading and caching images from remote URLs.
- * <p>
+ *
  * The simple way to use this class is to call {@link ImageLoader#get(String, ImageListener)}
  * and to pass in the default image listener provided by
  * {@link ImageLoader#getImageListener(ImageView, int, int)}. Note that all function calls to
@@ -104,6 +104,16 @@ public class ImageLoader {
     }
 
     /**
+     * Constructs a new ImageLoader with {@link BitmapLruCache} BitmapLruCache as L1 cache.
+     *
+     * @param queue The RequestQueue to use for making image requests.
+     */
+    public ImageLoader(RequestQueue queue) {
+        mRequestQueue = queue;
+        mCache = new BitmapLruCache();
+    }
+
+    /**
      * The default implementation of ImageListener which handles basic functionality
      * of showing a default image until the network response is received, at which point
      * it will switch to either the actual image or the error image.
@@ -136,12 +146,12 @@ public class ImageLoader {
 
     /**
      * Interface for the response handlers on image requests.
-     * <p>
+     *
      * The call flow is this:
      * 1. Upon being  attached to a request, onResponse(response, true) will
      * be invoked to reflect any cached data that was already available. If the
      * data was available, response.getBitmap() will be non-null.
-     * <p>
+     *
      * 2. After a network response returns, only one of the following cases will happen:
      * - onResponse(response, false) will be called if the image was loaded.
      * or
@@ -218,7 +228,7 @@ public class ImageLoader {
      * @param requestUrl The url of the remote image
      * @param maxWidth   The maximum width of the returned image.
      * @param maxHeight  The maximum height of the returned image.
-     * @param scaleType     The ImageViews ScaleType used to calculate the needed image size.
+     * @param scaleType  The ImageViews ScaleType used to calculate the needed image size.
      * @return A bitmap object.
      */
     public Bitmap download(String requestUrl, int maxWidth, int maxHeight, ScaleType scaleType) {
@@ -254,7 +264,7 @@ public class ImageLoader {
 
     /**
      * Returns an ImageContainer for the requested URL.
-     * <p>
+     *
      * The ImageContainer will contain either the specified default bitmap or the loaded bitmap.
      * If the default was returned, the {@link ImageLoader} will be invoked when the
      * request is fulfilled.
