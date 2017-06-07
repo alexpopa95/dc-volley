@@ -25,6 +25,7 @@ public class ImageUtils {
      * @param actualPrimary   Actual size of the primary dimension
      * @param actualSecondary Actual size of the secondary dimension
      * @param scaleType       The ScaleType used to calculate the needed image size.
+     * @return The resized dimension
      */
     public static int getResizedDimension(int maxPrimary, int maxSecondary, int actualPrimary,
                                           int actualSecondary, ImageView.ScaleType scaleType) {
@@ -77,6 +78,7 @@ public class ImageUtils {
      * @param actualHeight  Actual height of the bitmap
      * @param desiredWidth  Desired width of the bitmap
      * @param desiredHeight Desired height of the bitmap
+     * @return The best sample size for downscaling
      */
     // Visible for testing.
     public static int findBestSampleSize(
@@ -255,6 +257,7 @@ public class ImageUtils {
     /**
      * Creates the Bitmap decode options based on SDK version.
      *
+     * @param decodeConfig The Bitmap decode config to be used
      * @return the Bitmap options
      */
     @SuppressWarnings("deprecation")
