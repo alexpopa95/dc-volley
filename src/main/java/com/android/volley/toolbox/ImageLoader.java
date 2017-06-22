@@ -250,7 +250,7 @@ public class ImageLoader {
         }
 
         RequestFuture<Bitmap> response = RequestFuture.newFuture();
-        Request<Bitmap> newRequest = makeImageRequest(requestUrl, response, maxWidth, maxHeight,
+        ImageRequest newRequest = makeImageRequest(requestUrl, response, maxWidth, maxHeight,
                 scaleType, response);
 
         mRequestQueue.add(newRequest);
@@ -266,7 +266,7 @@ public class ImageLoader {
         return bitmap;
     }
 
-    protected Request<Bitmap> makeImageRequest(String requestUrl, Listener<Bitmap> listener,
+    protected ImageRequest makeImageRequest(String requestUrl, Listener<Bitmap> listener,
                                                int maxWidth, int maxHeight, ScaleType scaleType,
                                                ErrorListener errorListener) {
         return new ImageRequest(requestUrl, listener, maxWidth, maxHeight, scaleType, Config.RGB_565, errorListener);
