@@ -29,11 +29,10 @@ import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Helper that handles loading and caching images from remote URLs.
@@ -201,7 +200,8 @@ public class ImageLoader {
      * @return True if the item exists in cache, false otherwise.
      */
     public boolean isCached(String requestUrl, int maxWidth, int maxHeight, ScaleType scaleType) {
-        throwIfNotOnMainThread();
+        throwIfNotOnMainThread("isCached(java.lang.String, int, int, " +
+                "android.widget.ImageView.ScaleType)");
 
         String cacheKey = getCacheKey(requestUrl, maxWidth, maxHeight, scaleType);
         return mCache.getBitmap(cacheKey) != null;
@@ -249,24 +249,39 @@ public class ImageLoader {
             return cachedBitmap;
         }
 
+        Bitmap bitmap = null;
+        if (Request.isFile(requestUrl)) {
+            File bitmapFile = new File(requestUrl.substring(7, requestUrl.length()));
+            if (!bitmapFile.exists() || !bitmapFile.isFile()) {
+                return null;
+            }
+            bitmap = ImageUtils.createFromFile(bitmapFile, maxWidth, maxHeight, scaleType);
+            if (bitmap != null) {
+                mCache.putBitmap(cacheKey, bitmap);
+            }
+            return bitmap;
+        }
+
+        // only fulfill requests that were initiated from the main thread.
+        throwIfOnMainThread("download(java.lang.String, int, int, " +
+                "android.widget.ImageView.ScaleType)");
+
         RequestFuture<Bitmap> response = RequestFuture.newFuture();
-        ImageRequest newRequest = makeImageRequest(requestUrl, response, maxWidth, maxHeight,
+        Request<Bitmap> newRequest = makeImageRequest(requestUrl, response, maxWidth, maxHeight,
                 scaleType, response);
 
         mRequestQueue.add(newRequest);
-
-        Bitmap bitmap = null;
         try {
-            bitmap = response.get(REQUEST_TIMEOUT, TimeUnit.SECONDS);
+            bitmap = response.get();
             onGetImageSuccess(cacheKey, bitmap);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        } catch (InterruptedException | ExecutionException e) {
             onGetImageError(cacheKey, new VolleyError(e));
             VolleyLog.e("Error downloading bitmap %s", requestUrl);
         }
         return bitmap;
     }
 
-    protected ImageRequest makeImageRequest(String requestUrl, Listener<Bitmap> listener,
+    protected Request<Bitmap> makeImageRequest(String requestUrl, Listener<Bitmap> listener,
                                                int maxWidth, int maxHeight, ScaleType scaleType,
                                                ErrorListener errorListener) {
         return new ImageRequest(requestUrl, listener, maxWidth, maxHeight, scaleType, Config.RGB_565, errorListener);
@@ -321,7 +336,9 @@ public class ImageLoader {
                               int maxWidth, int maxHeight, ScaleType scaleType) {
 
         // only fulfill requests that were initiated from the main thread.
-        throwIfNotOnMainThread();
+        throwIfNotOnMainThread("get(java.lang.String, " +
+                "com.android.volley.toolbox.ImageLoader.ImageListener, " +
+                "int, int, android.widget.ImageView.ScaleType)");
 
         final String cacheKey = getCacheKey(requestUrl, maxWidth, maxHeight, scaleType);
 
@@ -632,11 +649,20 @@ public class ImageLoader {
     }
 
     /**
+     * Checks if the execution is not on the MainThread.
+     */
+    private void throwIfNotOnMainThread(String from) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            throw new IllegalStateException("ImageLoader#" + from + " must be invoked from the main thread.");
+        }
+    }
+
+    /**
      * Checks if the execution is on the MainThread.
      */
-    private void throwIfNotOnMainThread() {
+    private void throwIfOnMainThread(String from) {
         if (Looper.myLooper() != Looper.getMainLooper()) {
-            throw new IllegalStateException("ImageLoader must be invoked from the main thread.");
+            throw new IllegalStateException("ImageLoader#" + from + " can not be invoked from the main thread.");
         }
     }
 
