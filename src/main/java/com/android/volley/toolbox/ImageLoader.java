@@ -1,12 +1,12 @@
 /**
  * Copyright (C) 2013 The Android Open Source Project
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,10 +32,12 @@ import com.android.volley.VolleyLog;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Helper that handles loading and caching images from remote URLs.
- *
+ * <p>
  * The simple way to use this class is to call {@link ImageLoader#get(String, ImageListener)}
  * and to pass in the default image listener provided by
  * {@link ImageLoader#getImageListener(ImageView, int, int)}. Note that all function calls to
@@ -43,6 +45,12 @@ import java.util.concurrent.ExecutionException;
  * thread as well.
  */
 public class ImageLoader {
+
+    /**
+     * Sync request timeout.
+     */
+    private final static long REQUEST_TIMEOUT = 30;
+
     /**
      * RequestQueue for dispatching ImageRequests onto.
      */
@@ -146,12 +154,12 @@ public class ImageLoader {
 
     /**
      * Interface for the response handlers on image requests.
-     *
+     * <p>
      * The call flow is this:
      * 1. Upon being  attached to a request, onResponse(response, true) will
      * be invoked to reflect any cached data that was already available. If the
      * data was available, response.getBitmap() will be non-null.
-     *
+     * <p>
      * 2. After a network response returns, only one of the following cases will happen:
      * - onResponse(response, false) will be called if the image was loaded.
      * or
@@ -249,8 +257,10 @@ public class ImageLoader {
 
         Bitmap bitmap = null;
         try {
-            bitmap = response.get();
-        } catch (InterruptedException | ExecutionException e) {
+            bitmap = response.get(REQUEST_TIMEOUT, TimeUnit.SECONDS);
+            onGetImageSuccess(cacheKey, bitmap);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            onGetImageError(cacheKey, new VolleyError(e));
             VolleyLog.e("Error downloading bitmap %s", requestUrl);
         }
         return bitmap;
@@ -264,7 +274,7 @@ public class ImageLoader {
 
     /**
      * Returns an ImageContainer for the requested URL.
-     *
+     * <p>
      * The ImageContainer will contain either the specified default bitmap or the loaded bitmap.
      * If the default was returned, the {@link ImageLoader} will be invoked when the
      * request is fulfilled.
