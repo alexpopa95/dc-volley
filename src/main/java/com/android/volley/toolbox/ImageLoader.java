@@ -208,6 +208,61 @@ public class ImageLoader {
     }
 
     /**
+     * Returns a bitmap for the requested file.
+     *
+     * @param file The file of the image to be loaded.
+     * @return A bitmap object.
+     */
+    public Bitmap load(File file) {
+        return load(file, 0, 0);
+    }
+
+    /**
+     * Returns a bitmap for the requested file.
+     *
+     * @param file      The file of the image to be loaded.
+     * @param maxWidth  The maximum width of the returned image.
+     * @param maxHeight The maximum height of the returned image.
+     * @return A bitmap object.
+     */
+    public Bitmap load(File file, int maxWidth, int maxHeight) {
+        return load(file, maxWidth, maxHeight, ScaleType.CENTER_INSIDE);
+    }
+
+    /**
+     * Returns a bitmap for the requested file.
+     *
+     * @param file      The file of the image to be loaded.
+     * @param maxWidth  The maximum width of the returned image.
+     * @param maxHeight The maximum height of the returned image.
+     * @param scaleType The ImageViews ScaleType used to calculate the needed image size.
+     * @return A bitmap object.
+     */
+    public Bitmap load(File file, int maxWidth, int maxHeight, ScaleType scaleType) {
+        if (file == null) {
+            return null;
+        }
+        if (!file.exists() || !file.isFile()) {
+            return null;
+        }
+        String fileName = file.getAbsolutePath();
+        final String cacheKey = getCacheKey(fileName, maxWidth, maxHeight, scaleType);
+
+        // Try to look up the request in the cache of remote images.
+        Bitmap cachedBitmap = mCache.getBitmap(cacheKey);
+        if (cachedBitmap != null) {
+            // Return the cached bitmap.
+            return cachedBitmap;
+        }
+
+        Bitmap bitmap = ImageUtils.createFromFile(file, maxWidth, maxHeight, scaleType);
+        if (bitmap != null) {
+            mCache.putBitmap(cacheKey, bitmap);
+        }
+        return bitmap;
+    }
+
+    /**
      * Returns a bitmap for the requested URL.
      *
      * @param requestUrl The URL of the image to be loaded.
@@ -240,6 +295,11 @@ public class ImageLoader {
      * @return A bitmap object.
      */
     public Bitmap download(String requestUrl, int maxWidth, int maxHeight, ScaleType scaleType) {
+
+        // only fulfill requests that were initiated from the main thread.
+        throwIfOnMainThread("download(java.lang.String, int, int, " +
+                "android.widget.ImageView.ScaleType)");
+
         final String cacheKey = getCacheKey(requestUrl, maxWidth, maxHeight, scaleType);
 
         // Try to look up the request in the cache of remote images.
@@ -249,28 +309,13 @@ public class ImageLoader {
             return cachedBitmap;
         }
 
-        Bitmap bitmap = null;
-        if (Request.isFile(requestUrl)) {
-            File bitmapFile = new File(requestUrl.substring(7, requestUrl.length()));
-            if (!bitmapFile.exists() || !bitmapFile.isFile()) {
-                return null;
-            }
-            bitmap = ImageUtils.createFromFile(bitmapFile, maxWidth, maxHeight, scaleType);
-            if (bitmap != null) {
-                mCache.putBitmap(cacheKey, bitmap);
-            }
-            return bitmap;
-        }
-
-        // only fulfill requests that were initiated from the main thread.
-        throwIfOnMainThread("download(java.lang.String, int, int, " +
-                "android.widget.ImageView.ScaleType)");
-
         RequestFuture<Bitmap> response = RequestFuture.newFuture();
         Request<Bitmap> newRequest = makeImageRequest(requestUrl, response, maxWidth, maxHeight,
                 scaleType, response);
 
         mRequestQueue.add(newRequest);
+
+        Bitmap bitmap = null;
         try {
             bitmap = response.get();
             onGetImageSuccess(cacheKey, bitmap);
