@@ -706,7 +706,7 @@ public class ImageLoader {
      * Checks if the execution is on the MainThread.
      */
     private void throwIfOnMainThread(String from) {
-        if (Looper.myLooper() != Looper.getMainLooper()) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
             throw new IllegalStateException("ImageLoader#" + from + " can not be invoked from the main thread.");
         }
     }
