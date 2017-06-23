@@ -137,10 +137,8 @@ public class ImageRequest extends Request<Bitmap> {
      * This version is for reading a Bitmap from file
      */
     private Response<Bitmap> doFileParse() {
-        final String requestUrl = getUrl();
-        // Remove the 'file://' prefix
-        File bitmapFile = new File(requestUrl.substring(7, requestUrl.length()));
-        if (!bitmapFile.exists() || !bitmapFile.isFile()) {
+        File bitmapFile = ImageUtils.parse(getUrl());
+        if (bitmapFile == null || !bitmapFile.exists() || !bitmapFile.isFile()) {
             return Response.error(new ParseError(new FileNotFoundException(
                     String.format("File not found: %s", bitmapFile.getAbsolutePath()))));
         }

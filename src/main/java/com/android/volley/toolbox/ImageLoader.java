@@ -296,7 +296,7 @@ public class ImageLoader {
      */
     public Bitmap download(String requestUrl, int maxWidth, int maxHeight, ScaleType scaleType) {
 
-        // only fulfill requests that were initiated from the main thread.
+        // only fulfill requests that were NOT initiated from the main thread.
         throwIfOnMainThread("download(java.lang.String, int, int, " +
                 "android.widget.ImageView.ScaleType)");
 
