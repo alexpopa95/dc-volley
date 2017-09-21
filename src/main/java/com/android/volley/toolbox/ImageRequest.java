@@ -35,7 +35,7 @@ import java.io.FileNotFoundException;
  * A canned request for getting an image at a given URL and calling
  * back with a decoded Bitmap.
  */
-public class ImageRequest extends Request<Bitmap> {
+public class ImageRequest extends Request<Bitmap> implements Response.ProgressListener {
     /**
      * Socket timeout in milliseconds for image requests
      */
@@ -52,6 +52,7 @@ public class ImageRequest extends Request<Bitmap> {
     private static final float IMAGE_BACKOFF_MULT = 2f;
 
     private final Response.Listener<Bitmap> mListener;
+    private final Response.ProgressListener mProgressListener;
     private final Config mDecodeConfig;
     private final int mMaxWidth;
     private final int mMaxHeight;
@@ -71,21 +72,24 @@ public class ImageRequest extends Request<Bitmap> {
      * be fit in the rectangle of dimensions width x height while keeping its
      * aspect ratio.
      *
-     * @param url           URL of the image
-     * @param listener      Listener to receive the decoded bitmap
-     * @param maxWidth      Maximum width to decode this bitmap to, or zero for none
-     * @param maxHeight     Maximum height to decode this bitmap to, or zero for
-     *                      none
-     * @param scaleType     The ImageViews ScaleType used to calculate the needed image size.
-     * @param decodeConfig  Format to decode the bitmap to
-     * @param errorListener Error listener, or null to ignore errors
+     * @param url              URL of the image
+     * @param listener         Listener to receive the decoded bitmap
+     * @param maxWidth         Maximum width to decode this bitmap to, or zero for none
+     * @param maxHeight        Maximum height to decode this bitmap to, or zero for
+     *                         none
+     * @param scaleType        The ImageViews ScaleType used to calculate the needed image size.
+     * @param decodeConfig     Format to decode the bitmap to
+     * @param errorListener    Error listener, or null to ignore errors
+     * @param progressListener The image progress listener
      */
     public ImageRequest(String url, Response.Listener<Bitmap> listener, int maxWidth, int maxHeight,
-                        ScaleType scaleType, Config decodeConfig, Response.ErrorListener errorListener) {
+                        ScaleType scaleType, Config decodeConfig, Response.ErrorListener errorListener,
+                        Response.ProgressListener progressListener) {
         super(Method.GET, url, errorListener);
         setRetryPolicy(
                 new DefaultRetryPolicy(IMAGE_TIMEOUT_MS, IMAGE_MAX_RETRIES, IMAGE_BACKOFF_MULT));
         mListener = listener;
+        mProgressListener = progressListener;
         mDecodeConfig = decodeConfig;
         mMaxWidth = maxWidth;
         mMaxHeight = maxHeight;
@@ -93,21 +97,46 @@ public class ImageRequest extends Request<Bitmap> {
     }
 
     /**
+     * Creates a new image request, decoding to a maximum specified width and
+     * height. If both width and height are zero, the image will be decoded to
+     * its natural size. If one of the two is nonzero, that dimension will be
+     * clamped and the other one will be set to preserve the image's aspect
+     * ratio. If both width and height are nonzero, the image will be decoded to
+     * be fit in the rectangle of dimensions width x height while keeping its
+     * aspect ratio.
+     *
+     * @param url              URL of the image
+     * @param listener         Listener to receive the decoded bitmap
+     * @param maxWidth         Maximum width to decode this bitmap to, or zero for none
+     * @param maxHeight        Maximum height to decode this bitmap to, or zero for
+     *                         none
+     * @param scaleType        The ImageViews ScaleType used to calculate the needed image size.
+     * @param decodeConfig     Format to decode the bitmap to
+     * @param errorListener    Error listener, or null to ignore errors
+     */
+    public ImageRequest(String url, Response.Listener<Bitmap> listener, int maxWidth, int maxHeight,
+                        ScaleType scaleType, Config decodeConfig, Response.ErrorListener errorListener) {
+        this(url, listener, maxWidth, maxHeight, scaleType, decodeConfig, errorListener, null);
+    }
+
+    /**
      * For API compatibility with the pre-ScaleType variant of the constructor. Equivalent to
      * the normal constructor with {@code ScaleType.CENTER_INSIDE}.
      *
-     * @param url           URL of the image
-     * @param listener      Listener to receive the decoded bitmap
-     * @param maxWidth      Maximum width to decode this bitmap to, or zero for none
-     * @param maxHeight     Maximum height to decode this bitmap to, or zero for
-     *                      none
-     * @param decodeConfig  Format to decode the bitmap to
-     * @param errorListener Error listener, or null to ignore errors
+     * @param url              URL of the image
+     * @param listener         Listener to receive the decoded bitmap
+     * @param maxWidth         Maximum width to decode this bitmap to, or zero for none
+     * @param maxHeight        Maximum height to decode this bitmap to, or zero for
+     *                         none
+     * @param decodeConfig     Format to decode the bitmap to
+     * @param errorListener    Error listener, or null to ignore errors
+     * @param progressListener The image progress listener
      */
     @Deprecated
     public ImageRequest(String url, Response.Listener<Bitmap> listener, int maxWidth, int maxHeight,
-                        Config decodeConfig, Response.ErrorListener errorListener) {
-        this(url, listener, maxWidth, maxHeight, ScaleType.CENTER_INSIDE, decodeConfig, errorListener);
+                        Config decodeConfig, Response.ErrorListener errorListener,
+                        Response.ProgressListener progressListener) {
+        this(url, listener, maxWidth, maxHeight, ScaleType.CENTER_INSIDE, decodeConfig, errorListener, progressListener);
     }
 
     @Override
@@ -133,7 +162,7 @@ public class ImageRequest extends Request<Bitmap> {
 
     /**
      * The real guts of parseNetworkResponse. Broken out for readability.
-     *
+     * <p>
      * This version is for reading a Bitmap from file
      */
     private Response<Bitmap> doFileParse() {
@@ -175,4 +204,10 @@ public class ImageRequest extends Request<Bitmap> {
         mListener.onResponse(response);
     }
 
+    @Override
+    public void onProgress(int progress, long transferredBytes, long totalSize, long millisSpent, int retryCount) {
+        if (mProgressListener != null) {
+            mProgressListener.onProgress(progress, transferredBytes, totalSize, millisSpent, retryCount);
+        }
+    }
 }

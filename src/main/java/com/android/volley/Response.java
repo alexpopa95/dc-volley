@@ -49,6 +49,24 @@ public class Response<T> {
     }
 
     /**
+     * Callback interface for delivering the progress of the responses.
+     */
+    public interface ProgressListener {
+
+        /**
+         * Callback called each time byte chunks are downloaded
+         *
+         * @param progress         Progress percentage from 0 to 100
+         * @param transferredBytes Downloaded bytes
+         * @param totalSize        Total response size
+         * @param millisSpent      Current time spent on download
+         * @param retryCount       Current request retries
+         */
+        public void onProgress(int progress, long transferredBytes, long totalSize, long millisSpent, int retryCount);
+
+    }
+
+    /**
      * Returns a successful response containing the parsed result.
      *
      * @param result     A result of the expected type

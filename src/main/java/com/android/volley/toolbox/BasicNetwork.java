@@ -27,6 +27,7 @@ import com.android.volley.NetworkResponse;
 import com.android.volley.NoConnectionError;
 import com.android.volley.RedirectError;
 import com.android.volley.Request;
+import com.android.volley.Response.ProgressListener;
 import com.android.volley.RetryPolicy;
 import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
@@ -57,9 +58,13 @@ import java.util.TreeMap;
 public class BasicNetwork implements Network {
     protected static final boolean DEBUG = VolleyLog.DEBUG;
 
-    private static int SLOW_REQUEST_THRESHOLD_MS = 3000;
+    /*
+     * is the time to wait before logging slow internet
+     * Volley considers a request slow only if it takes more than 3 seconds
+     */
+    private static final int SLOW_REQUEST_THRESHOLD_MS = 3000;
 
-    private static int DEFAULT_POOL_SIZE = 4096;
+    private static final int DEFAULT_POOL_SIZE = 4096;
 
     protected final HttpStack mHttpStack;
 
@@ -106,7 +111,7 @@ public class BasicNetwork implements Network {
                     if (entry == null) {
                         return new NetworkResponse(HttpStatus.SC_NOT_MODIFIED, null,
                                 responseHeaders, true,
-                                SystemClock.elapsedRealtime() - requestStart);
+                                getTimeElapsed(requestStart));
                     }
 
                     // A HTTP 304 response does not have all header fields. We
@@ -116,7 +121,7 @@ public class BasicNetwork implements Network {
                     entry.responseHeaders.putAll(responseHeaders);
                     return new NetworkResponse(HttpStatus.SC_NOT_MODIFIED, entry.data,
                             entry.responseHeaders, true,
-                            SystemClock.elapsedRealtime() - requestStart);
+                            getTimeElapsed(requestStart));
                 }
 
                 // Handle moved resources
@@ -127,7 +132,7 @@ public class BasicNetwork implements Network {
 
                 // Some responses such as 204s do not have content.  We must check.
                 if (httpResponse.getEntity() != null) {
-                    responseContents = entityToBytes(httpResponse.getEntity());
+                    responseContents = entityToBytes(request, httpResponse.getEntity());
                 } else {
                     // Add 0 byte response as a way of honestly representing a
                     // no-content request.
@@ -135,14 +140,14 @@ public class BasicNetwork implements Network {
                 }
 
                 // if the request is slow, log it.
-                long requestLifetime = SystemClock.elapsedRealtime() - requestStart;
+                long requestLifetime = getTimeElapsed(requestStart);
                 logSlowRequests(requestLifetime, request, responseContents, statusLine);
 
                 if (statusCode < 200 || statusCode > 299) {
                     throw new IOException();
                 }
                 return new NetworkResponse(statusCode, responseContents, responseHeaders, false,
-                        SystemClock.elapsedRealtime() - requestStart);
+                        getTimeElapsed(requestStart));
             } catch (SocketTimeoutException e) {
                 attemptRetryOnException("socket", request, new TimeoutError());
             } catch (ConnectTimeoutException e) {
@@ -165,7 +170,7 @@ public class BasicNetwork implements Network {
                 }
                 if (responseContents != null) {
                     networkResponse = new NetworkResponse(statusCode, responseContents,
-                            responseHeaders, false, SystemClock.elapsedRealtime() - requestStart);
+                            responseHeaders, false, getTimeElapsed(requestStart));
                     if (statusCode == HttpStatus.SC_UNAUTHORIZED ||
                             statusCode == HttpStatus.SC_FORBIDDEN) {
                         attemptRetryOnException("auth",
@@ -219,6 +224,10 @@ public class BasicNetwork implements Network {
         request.addMarker(String.format("%s-retry [timeout=%s]", logPrefix, oldTimeout));
     }
 
+    private long getTimeElapsed(long startTime) {
+        return SystemClock.elapsedRealtime() - startTime;
+    }
+
     private void addCacheHeaders(Map<String, String> headers, Cache.Entry entry) {
         // If there's no cache entry, we're done.
         if (entry == null) {
@@ -236,16 +245,16 @@ public class BasicNetwork implements Network {
     }
 
     protected void logError(String what, String url, long start) {
-        long now = SystemClock.elapsedRealtime();
-        VolleyLog.v("HTTP ERROR(%s) %d ms to fetch %s", what, (now - start), url);
+        VolleyLog.v("HTTP ERROR(%s) %d ms to fetch %s", what, getTimeElapsed(start), url);
     }
 
     /**
      * Reads the contents of HttpEntity into a byte[].
      */
-    private byte[] entityToBytes(HttpEntity entity) throws IOException, ServerError {
-        PoolingByteArrayOutputStream bytes =
-                new PoolingByteArrayOutputStream(mPool, (int) entity.getContentLength());
+    private byte[] entityToBytes(Request<?> request, HttpEntity entity) throws IOException, ServerError {
+        long downloadStart = SystemClock.elapsedRealtime();
+        long totalSize = entity.getContentLength();
+        PoolingByteArrayOutputStream bytes = new PoolingByteArrayOutputStream(mPool, (int) totalSize);
         byte[] buffer = null;
         try {
             InputStream in = entity.getContent();
@@ -254,8 +263,32 @@ public class BasicNetwork implements Network {
             }
             buffer = mPool.getBuf(1024);
             int count;
+            int transferredBytes = 0;
+            ProgressListener progressListener = null;
+            /*
+             * Get Progress Listener from request.
+             * To implement ProgressListener you have to extend the Request<T> to
+             * Response.ProgressListener
+             * ImageRequest is extending ProgressListener from default
+             */
+            if (request instanceof ProgressListener) {
+                progressListener = (ProgressListener) request;
+            }
             while ((count = in.read(buffer)) != -1) {
                 bytes.write(buffer, 0, count);
+                transferredBytes += count;
+                /*
+                 * At this point progressListener checks are made only if request
+                 * need the progress info
+                 */
+                if (progressListener != null) {
+                    progressListener.onProgress(
+                            ((int) (100 * transferredBytes / totalSize)),
+                            transferredBytes,
+                            totalSize,
+                            getTimeElapsed(downloadStart),
+                            request.getRetryPolicy().getCurrentRetryCount());
+                }
             }
             return bytes.toByteArray();
         } finally {

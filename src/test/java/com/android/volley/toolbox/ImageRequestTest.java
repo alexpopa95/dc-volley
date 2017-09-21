@@ -130,7 +130,7 @@ public class ImageRequestTest {
     private void verifyResize(NetworkResponse networkResponse, int maxWidth, int maxHeight,
                               ScaleType scaleType, int expectedWidth, int expectedHeight) {
         ImageRequest request = new ImageRequest("", null, maxWidth, maxHeight, scaleType,
-                Config.RGB_565, null);
+                Config.RGB_565, null, null);
         Response<Bitmap> response = request.parseNetworkResponse(networkResponse);
         assertNotNull(response);
         assertTrue(response.isSuccess());
@@ -170,9 +170,9 @@ public class ImageRequestTest {
     public void publicMethods() throws Exception {
         // Catch-all test to find API-breaking changes.
         assertNotNull(ImageRequest.class.getConstructor(String.class, Response.Listener.class,
-                int.class, int.class, Bitmap.Config.class, Response.ErrorListener.class));
+                int.class, int.class, Bitmap.Config.class, Response.ErrorListener.class, Response.ProgressListener.class));
         assertNotNull(ImageRequest.class.getConstructor(String.class, Response.Listener.class,
                 int.class, int.class, ImageView.ScaleType.class, Bitmap.Config.class,
-                Response.ErrorListener.class));
+                Response.ErrorListener.class, Response.ProgressListener.class));
     }
 }
