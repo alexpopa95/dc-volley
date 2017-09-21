@@ -24,6 +24,7 @@ import android.widget.ImageView.ScaleType;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
@@ -44,11 +45,6 @@ import java.util.concurrent.ExecutionException;
  * thread as well.
  */
 public class ImageLoader {
-
-    /**
-     * Sync request timeout.
-     */
-    private final static long REQUEST_TIMEOUT = 30;
 
     /**
      * RequestQueue for dispatching ImageRequests onto.
@@ -310,8 +306,8 @@ public class ImageLoader {
         }
 
         RequestFuture<Bitmap> response = RequestFuture.newFuture();
-        Request<Bitmap> newRequest = makeImageRequest(requestUrl, response, maxWidth, maxHeight,
-                scaleType, response);
+        Request<Bitmap> newRequest = makeImageRequest(requestUrl, maxWidth, maxHeight,
+                scaleType, response, response, null);
 
         mRequestQueue.add(newRequest);
 
@@ -326,10 +322,13 @@ public class ImageLoader {
         return bitmap;
     }
 
-    protected Request<Bitmap> makeImageRequest(String requestUrl, Listener<Bitmap> listener,
-                                               int maxWidth, int maxHeight, ScaleType scaleType,
-                                               ErrorListener errorListener) {
-        return new ImageRequest(requestUrl, listener, maxWidth, maxHeight, scaleType, Config.RGB_565, errorListener);
+    protected Request<Bitmap> makeImageRequest(String requestUrl, int maxWidth, int maxHeight,
+                                               ScaleType scaleType, Listener<Bitmap> listener,
+                                               ErrorListener errorListener,
+                                               Response.ProgressListener progressListener) {
+        ImageRequest imageRequest = new ImageRequest(requestUrl, listener, maxWidth, maxHeight, scaleType, Config.RGB_565,
+                errorListener, progressListener);
+        return imageRequest;
     }
 
     /**
@@ -345,7 +344,21 @@ public class ImageLoader {
      * the currently available image (default if remote is not loaded).
      */
     public ImageContainer get(String requestUrl, final ImageListener listener) {
-        return get(requestUrl, listener, 0, 0);
+        return get(requestUrl, listener, null);
+    }
+
+    /**
+     * Returns an ImageContainer for the requested URL.
+     *
+     * @param requestUrl       The URL of the image to be loaded.
+     * @param listener         The image listener
+     * @param progressListener The image progress listener
+     * @return A container object that contains all of the properties of the request, as well as
+     * the currently available image (default if remote is not loaded).
+     */
+    public ImageContainer get(String requestUrl, final ImageListener listener,
+                              Response.ProgressListener progressListener) {
+        return get(requestUrl, listener, progressListener, 0, 0);
     }
 
     /**
@@ -360,7 +373,24 @@ public class ImageLoader {
      */
     public ImageContainer get(String requestUrl, ImageListener imageListener,
                               int maxWidth, int maxHeight) {
-        return get(requestUrl, imageListener, maxWidth, maxHeight, ScaleType.CENTER_INSIDE);
+        return get(requestUrl, imageListener, null, maxWidth, maxHeight, ScaleType.CENTER_INSIDE);
+    }
+
+    /**
+     * Returns an ImageContainer for the requested URL.
+     *
+     * @param requestUrl       The URL of the image to be loaded.
+     * @param imageListener    The image listener
+     * @param progressListener The image progress listener
+     * @param maxWidth         The maximum width of the returned image.
+     * @param maxHeight        The maximum height of the returned image.
+     * @return A container object that contains all of the properties of the request, as well as
+     * the currently available image (default if remote is not loaded).
+     */
+    public ImageContainer get(String requestUrl, ImageListener imageListener,
+                              Response.ProgressListener progressListener,
+                              int maxWidth, int maxHeight) {
+        return get(requestUrl, imageListener, progressListener, maxWidth, maxHeight, ScaleType.CENTER_INSIDE);
     }
 
     /**
@@ -378,6 +408,27 @@ public class ImageLoader {
      * the currently available image (default if remote is not loaded).
      */
     public ImageContainer get(String requestUrl, ImageListener imageListener,
+                              int maxWidth, int maxHeight, ScaleType scaleType) {
+        return get(requestUrl, imageListener, null, maxWidth, maxHeight, scaleType);
+    }
+
+    /**
+     * Issues a bitmap request with the given URL if that image is not available
+     * in the cache, and returns a bitmap container that contains all of the data
+     * relating to the request (as well as the default image if the requested
+     * image is not available).
+     *
+     * @param requestUrl       The url of the remote image
+     * @param imageListener    The listener to call when the remote image is loaded
+     * @param progressListener The image progress listener
+     * @param maxWidth         The maximum width of the returned image.
+     * @param maxHeight        The maximum height of the returned image.
+     * @param scaleType        The ImageViews ScaleType used to calculate the needed image size.
+     * @return A container object that contains all of the properties of the request, as well as
+     * the currently available image (default if remote is not loaded).
+     */
+    public ImageContainer get(String requestUrl, ImageListener imageListener,
+                              Response.ProgressListener progressListener,
                               int maxWidth, int maxHeight, ScaleType scaleType) {
 
         // only fulfill requests that were initiated from the main thread.
@@ -414,7 +465,7 @@ public class ImageLoader {
         // The request is not already in flight. Send the new request to the network and
         // track it.
         Request<Bitmap> newRequest = makeImageRequest(requestUrl, maxWidth, maxHeight, scaleType,
-                cacheKey);
+                cacheKey, progressListener);
 
         mRequestQueue.add(newRequest);
         mInFlightRequests.put(cacheKey,
@@ -423,18 +474,19 @@ public class ImageLoader {
     }
 
     protected Request<Bitmap> makeImageRequest(String requestUrl, int maxWidth, int maxHeight,
-                                               ScaleType scaleType, final String cacheKey) {
-        return new ImageRequest(requestUrl, new Listener<Bitmap>() {
+                                               ScaleType scaleType, final String cacheKey,
+                                               Response.ProgressListener progressListener) {
+        return makeImageRequest(requestUrl, maxWidth, maxHeight, scaleType, new Listener<Bitmap>() {
             @Override
             public void onResponse(Bitmap response) {
                 onGetImageSuccess(cacheKey, response);
             }
-        }, maxWidth, maxHeight, scaleType, Config.RGB_565, new ErrorListener() {
+        }, new ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 onGetImageError(cacheKey, error);
             }
-        });
+        }, progressListener);
     }
 
     /**
